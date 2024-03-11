@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Мои заявки{% endblock %}
+{% block content %}
+    {% if applications %}
+        <h1>Таблица заявок</h1>
+        <table class="info-table">
+            <tr>
+                <th>Проект</th>
+                <th>Вакансия</th>
+                <th>Дата создания</th>
+                <th></th>
+            </tr>
+            {% for application in applications %}
+                <tr>
+                    <td>
+                        <a href="{% url 'projects:project_info' application.vacancy.project.pk %}">{{ application.vacancy.project.title }}</a>
+                    </td>
+                    <td>{{ application.vacancy.title }}</td>
+                    <td>{{ application.created }}</td>
+                    <td>
+                        <form method="post"
+                              action="{% url 'projects:project_withdraw' application.vacancy.project.pk application.vacancy.pk %}">
+                            {% csrf_token %}
+                            <button type="submit">Отозвать заявку</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h1>Заявок нет</h1>
+    {% endif %}
+{% endblock %}

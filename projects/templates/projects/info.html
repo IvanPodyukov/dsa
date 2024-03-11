@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load application_tags %}
+{% block title %}Проект {{ project.title }}{% endblock %}
+{% block content %}
+    <h1>Проект {{ project.title }}</h1>
+    <div class="info-project">
+        <div class="detail-project">
+            <h2>Информация о проекте</h2>
+            <p>Название: {{ project.title }}</p>
+            <p>Создатель: {{ project.creator }}</p>
+            <p>Описание: {{ project.description }}</p>
+            <p>Дата создания: {{ project.created }}</p>
+            <p>Дедлайн подачи заявки: {{ project.application_deadline }}</p>
+            <p>Срок завершения проекта: {{ project.completion_deadline }}</p>
+            <p>Статус проекта: {{ project.get_status_display }}</p>
+            Теги проекта:
+            <ul class="tag-list">
+                {% for tag in project.tags.all %}
+                    <li>{{ tag }}</li>
+                {% endfor %}
+            </ul>
+            {% if project.creator == request.user %}
+                <p>
+                    <a href="{% url "projects:project_update" project.pk %}">
+                        Редактировать информацию о проекте
+                    </a>
+                </p>
+            {% endif %}
+        </div>
+        <div class="participants-project">
+            <h2>Участники проекта</h2>
+            <table class="info-table">
+                <tr>
+                    <th>Роль</th>
+                    <th>Описание</th>
+                    <th>Участник</th>
+                </tr>
+                {% for participant in project.participants.all %}
+                    <tr>
+                        <td>{{ participant.title }}</td>
+                        <td>{{ participant.description }}</td>
+                        {% applicationExists participant request.user as isApplication %}
+                        <td>
+                            {% if participant.participant is not NULL %}
+                                Есть
+                            {% elif not isApplication %}
+                                <form method="post"
+                                      action="{% url 'projects:project_submit' project.pk participant.pk %}"
+                                      class="application-form">
+                                    {% csrf_token %}
+                                    <button type="submit">Подать заявку</button>
+                                </form>
+                            {% else %}
+                                <form method="post"
+                                      action="{% url 'projects:project_withdraw' project.pk participant.pk %}"
+                                      class="application-form">
+                                    {% csrf_token %}
+                                    <button type="submit">Отозвать заявку</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if project.creator == request.user %}
+                <p><a href="{% url "projects:participants_list" project.pk %}">Управлять командой</a></p>
+            {% endif %}
+        </div>
+        <div class="checkpoints-project">
+            {% if project.checkpoints.all %}
+                <h2>Контрольные точки проекта</h2>
+                <table class="info-table">
+                    <tr>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Дедлайн</th>
+                    </tr>
+                    {% for checkpoint in project.checkpoints.all %}
+                        <tr>
+                            <td>{{ checkpoint.title }}</td>
+                            <td>{{ checkpoint.description }}</td>
+                            <td>{{ checkpoint.deadline }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                {% if project.creator == request.user %}
+                    <p class="edit-button">
+                        <a href="{% url "projects:checkpoints_update" project.pk %}">
+                            Редактировать контрольные точки
+                        </a>
+                    </p>
+                {% endif %}
+            {% else %}
+                <h2>Нет контрольных точек</h2>
+            {% endif %}
+        </div>
+    </div>
+    <p><a href="{{ request.META.HTTP_REFERER }}" class="central-element">Назад</a></p>
+{% endblock %}

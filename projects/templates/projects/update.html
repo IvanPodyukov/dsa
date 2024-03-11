@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Проект {{ project.title }}{% endblock %}
+{% block content %}
+    <h1>Редактирование проекта</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить</button>
+    </form>
+    <p><a href="{{ request.META.HTTP_REFERER }}">Назад</a></p>
+{% endblock %}

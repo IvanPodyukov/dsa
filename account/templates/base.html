@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a href="{% url 'main' %}">DSA</a></li>
+            {% if request.user.is_authenticated %}
+                <li><a href="{% url 'projects:projects_list' %}">Все проекты</a></li>
+                <li><a href="{% url 'projects:my_projects_list' %}">Мои проекты</a></li>
+                <li><a href="{% url 'projects:recommended_projects_list' %}">Рекомендованные проекты</a></li>
+                <li><a href="{% url 'applications:applications_list' %}">Мои заявки</a></li>
+                <li><a href="{% url 'checkpoints:checkpoints_list' %}">Мои контрольные точки</a></li>
+                <li><a href="{% url 'account:profile' %}">Личный кабинет</a></li>
+                <li>
+                    <form action="{% url 'account:logout' %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit">Выйти из аккаунта</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a href="{% url 'account:login' %}">Войти в аккаунт</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li class="msg">
+                {{ message|safe }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+<div class="main-content">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

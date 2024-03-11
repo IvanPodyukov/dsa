@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Контрольные точки{% endblock %}
+{% block content %}
+    {% if checkpoints %}
+        <h1>Таблица контрольных точек</h1>
+        <table class="info-table">
+            <tr>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Проект</th>
+                <th>Дедлайн</th>
+            </tr>
+            {% for checkpoint in checkpoints %}
+                <tr>
+                    <td>{{ checkpoint.title }}</td>
+                    <td>{{ checkpoint.description }}</td>
+                    <td>
+                        <a href="{% url 'projects:project_info' checkpoint.project.pk %}">{{ checkpoint.project.title }}</a>
+                    </td>
+                    <td>{{ checkpoint.deadline }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h1>Контрольных точек нет</h1>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Заявки на роль {{ participant.title }} в проекте {{ participant.project.title }}{% endblock %}
+{% block content %}
+    <h1>Заявки</h1>
+    {% if applications %}
+        <table class="info-table">
+            <tr>
+                <th>Никнейм</th>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Электронная почта</th>
+                <th>Номер телефона</th>
+                <th>Резюме</th>
+                <th>Время создания</th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for application in applications %}
+                <tr>
+                    {% with user=application.applicant %}
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.profile.phone }}</td>
+                        <td><a href="{{ user.profile.get_absolute_file_upload_url }}">Ссылка</a></td>
+                    {% endwith %}
+                    <td>{{ application.created }}</td>
+                    <td>
+                        <form method="post"
+                              action="{% url 'projects:application_accept' participant.project.pk participant.custom_id application.custom_id %}">
+                            {% csrf_token %}
+                            <button type="submit">Одобрить</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post"
+                              action="{% url 'projects:application_reject' participant.project.pk participant.custom_id application.custom_id %}">
+                            {% csrf_token %}
+                            <button type="submit">Отклонить</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Заявок нет</h2>
+    {% endif %}
+{% endblock %}

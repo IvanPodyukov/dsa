@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Мои проекты{% endblock %}
+{% block content %}
+    <h1>Созданные проекты</h1>
+    {% if my_projects %}
+        <table class="info-table">
+            <tr>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Статус</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for project in my_projects %}
+                <tr>
+                    <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
+                    <td>{{ project.description }}</td>
+                    <td>{{ project.get_status_display }}</td>
+                    <td><a href="{% url 'projects:project_update' project.pk %}">Редактировать информацию о проекте</a></td>
+                    <td><a href="{% url 'projects:checkpoints_update' project.pk %}">Редактировать контрольные точки</a></td>
+                    <td><a href="{% url 'projects:participants_list' project.pk %}">Управлять командой</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Нет созданных проектов</h2>
+    {% endif %}
+    <h1>Участвую в проектах</h1>
+    {% if my_participations %}
+        <table class="info-table">
+            <tr>
+                <th>Роль</th>
+                <th>Описание</th>
+                <th>Проект</th>
+                <th></th>
+            </tr>
+            {% for participant in my_participations %}
+                <tr>
+                    <td>{{ participant.title }}</td>
+                    <td>{{ participant.description }}</td>
+                    <td>
+                        <a href="{% url 'projects:project_info' participant.project.pk %}">{{ participant.project.title }}</a>
+                    </td>
+                    <td>
+                        <form method="post"
+                              action="{% url 'projects:leave_project' participant.project.pk participant.custom_id %}">
+                            {% csrf_token %}
+                            <button type="submit">Отказаться от участия</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Нет текущих проектов</h2>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Главная страница{% endblock %}
+{% block content %}
+    <h1>Добро пожаловать! Это DSA</h1>
+    {% if not request.user.is_authenticated %}
+        <p><a href="{% url 'account:register' %}" class="btn btn-primary">Регистрация</a></p>
+        <p><a href="{% url 'account:login' %} " class="btn btn-secondary">Войти в систему</a></p>
+    {% endif %}
+{% endblock %}

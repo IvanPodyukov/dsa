@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Создать проект{% endblock %}
+{% block content %}
+    <h1>Создание проекта</h1>
+    <form method="post">
+        <div class="info-project">
+            <div class="detail-project">
+                <h2>Проект:</h2>
+                {% csrf_token %}
+                {{ form.as_p }}
+            </div>
+            <div class="checkpoints-project">
+                <h2>Контрольные точки:</h2>
+                <div id="checkpoints-formset">
+                    {{ checkpoints.non_form_errors }}
+                    {{ checkpoints.management_form }}
+                    {% for checkpoint in checkpoints %}
+                        <div class="checkpoint-form">
+                            {{ checkpoint.as_p }}
+                            <!-- <button id="remove-checkpoint-form" type="button">Удалить</button> -->
+                        </div>
+                    {% endfor %}
+                </div>
+                <p class="add-button">
+                    <button id="add-checkpoint-form" type="button">Добавить контрольную точку</button>
+                </p>
+            </div>
+            <div class="participants-project">
+                <h2>Роли:</h2>
+                <div id="participants-formset">
+                    {{ participants.non_form_errors }}
+                    {{ participants.management_form }}
+                    {% for participant in participants %}
+                        <div class="participant-form">
+                            {{ participant.as_p }}
+                            <!-- <button id="remove-participant-form" type="button">Удалить</button> -->
+                        </div>
+                    {% endfor %}
+                </div>
+                <p class="add-button">
+                    <button id="add-participant-form" type="button">Добавить участника</button>
+                </p>
+            </div>
+
+        </div>
+        <p>
+            <button type="submit" class="central-element">Создать</button>
+        </p>
+    </form>
+
+    <p><a href="{% url 'projects:projects_list' %}" class="central-element">Назад</a></p>
+    <script>
+        let checkpointForm = document.querySelectorAll(".checkpoint-form")
+        let participantForm = document.querySelectorAll(".participant-form")
+        let checkpointContainer = document.querySelector("#checkpoints-formset")
+        let participantContainer = document.querySelector("#participants-formset")
+        let addCheckpointButton = document.querySelector("#add-checkpoint-form")
+        let addParticipantButton = document.querySelector("#add-participant-form")
+        let removeCheckpointButton = document.querySelector("#remove-checkpoint-form")
+        let removeParticipantButton = document.querySelector("#remove-participant-form")
+
+        let checkpointTotalForms = document.querySelector("#id_checkpoints-TOTAL_FORMS")
+        let participantTotalForms = document.querySelector("#id_participants-TOTAL_FORMS")
+
+        let checkpointNum = checkpointForm.length - 1
+        let participantNum = participantForm.length - 1
+        addCheckpointButton.addEventListener('click', addCheckpointForm)
+        addParticipantButton.addEventListener('click', addParticipantForm)
+        removeCheckpointButton.addEventListener('click', removeCheckpointForm)
+        removeParticipantButton.addEventListener('click', removeParticipantForm)
+
+        function addCheckpointForm(e) {
+            e.preventDefault()
+
+            let newForm = checkpointForm[0].cloneNode(true)
+            let formRegex = RegExp(`checkpoints-(\\d){1}-`, 'g')
+            checkpointNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `checkpoints-${checkpointNum}-`)
+            checkpointContainer.appendChild(newForm)
+            //newForm.querySelector("#remove-checkpoint-form").addEventListener("click", removeCheckpointForm);
+            checkpointTotalForms.setAttribute('value', `${checkpointNum + 1}`)
+        }
+
+        function addParticipantForm(e) {
+            e.preventDefault()
+
+            let newForm = participantForm[0].cloneNode(true)
+            let formRegex = RegExp(`participants-(\\d){1}-`, 'g')
+            participantNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `participants-${participantNum}-`)
+            participantContainer.appendChild(newForm)
+            //newForm.querySelector("#remove-participant-form").addEventListener("click", removeParticipantForm);
+            participantTotalForms.setAttribute('value', `${participantNum + 1}`)
+        }
+
+        function removeCheckpointForm(e) {
+            e.preventDefault();
+            const formDiv = e.target.parentElement;
+            formDiv.remove();
+            checkpointNum--
+            checkpointTotalForms.setAttribute('value', `${checkpointNum + 1}`)
+        }
+
+        function removeParticipantForm(e) {
+            e.preventDefault();
+            const formDiv = e.target.parentElement;
+            formDiv.remove();
+            participantNum--
+            participantTotalForms.setAttribute('value', `${participantNum + 1}`)
+        }
+    </script>
+{% endblock %}

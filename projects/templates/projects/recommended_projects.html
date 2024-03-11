@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load project_tags %}
+{% block title %}Рекомендованные проекты{% endblock %}
+{% block content %}
+    <h1>Рекомендованные проекты</h1>
+    {% if projects %}
+        <table class="info-table">
+            <tr>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Статус</th>
+                <th>Дедлайн подачи заявки</th>
+                <th>Дедлайн завершения проекта</th>
+                <th>Дата создания проекта</th>
+                <th>Количество участников</th>
+                <th>Количество вакансий</th>
+                <th>Пересечение научных интересов с пользователем</th>
+            </tr>
+            {% for project in projects %}
+                <tr>
+                    <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
+                    <td>{{ project.description }}</td>
+                    <td>{{ project.get_status_display }}</td>
+                    <td>{{ project.application_deadline }}</td>
+                    <td>{{ project.completion_deadline }}</td>
+                    <td>{{ project.created }}</td>
+                    <td>{{ project.number_of_participants }}</td>
+                    <td>{{ project.number_of_vacancies }}</td>
+                    {% commonInterests project request.user as interests %}
+                    <td>
+                        <ul>
+                            {% for interest in interests %}
+                                <li>{{ interest.title }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Нет рекомендованных проектов</h2>
+    {% endif %}
+{% endblock %}
