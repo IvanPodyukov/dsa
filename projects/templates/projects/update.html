@@ -7,5 +7,5 @@
         {{ form.as_p }}
         <button type="submit">Сохранить</button>
     </form>
-    <p><a href="{{ request.META.HTTP_REFERER }}">Назад</a></p>
+    <p><a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a></p>
 {% endblock %}

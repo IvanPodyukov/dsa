@@ -25,15 +25,12 @@
                         <a href="{% url 'projects:participant_applications_list' project.pk participant.custom_id %}">Посмотреть
                             заявки</a>
                     {% else %}
-                        <form method="post"
-                              action="{% url 'projects:remove_participant' project.pk participant.custom_id %}">
-                            {% csrf_token %}
-                            <button type="submit">Удалить участника</button>
-                        </form>
+                        <a href="{% url 'projects:confirm_clear_participant' project.pk participant.custom_id %}"
+                           class="application-form">Удалить участника</a>
                     {% endif %}
                 </td>
             </tr>
         {% endfor %}
     </table>
-    <p><a href="{{ request.META.HTTP_REFERER }}">Назад</a></p>
+    <p><a href="{% url 'projects:project_info' project.pk %}" class="back-button">Назад</a></p>
 {% endblock %}

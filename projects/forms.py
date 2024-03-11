@@ -52,6 +52,10 @@ class CheckpointInlineFormSet(BaseInlineFormSet):
                 form.add_error(None, forms.ValidationError(
                     'У контрольной точки не может дедлайн быть раньше дедлайна предыдущей'))
                 continue
+            if 'deadline' not in d:
+                form.add_error(None, forms.ValidationError(
+                    'Заполните дедлайн у контрольной точки'))
+                continue
             if not last_deadline and self.instance.application_deadline and d[
                 'deadline'] <= self.instance.application_deadline:
                 form.add_error(None,

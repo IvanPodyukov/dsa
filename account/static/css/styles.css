@@ -26,8 +26,10 @@ nav ul {
 }
 
 nav ul li {
-    display: inline;
+    display: inline-block;
     margin-right: 20px;
+    margin-bottom: 10px;
+    font-size: 20px;
 }
 
 nav a {
@@ -74,6 +76,7 @@ form button {
 nav form button {
     color: #007bff;
     background-color: #ffffff;
+    font-size: 20px;
 }
 
 header form button {
@@ -174,10 +177,6 @@ h1 {
     margin-top: auto;
 }
 
-.central-element {
-    margin-left: 50%;
-}
-
 .tag-list {
     list-style: none;
     display: inline;
@@ -202,21 +201,27 @@ h1 {
     align-items: center;
 }
 
-#add-checkpoint-form {
-
-}
-
 .add-button {
     display: flex;
     justify-content: center;
 }
 
-.edit-button {
-    position: relative;
-    top: 50%;
-}
-
 .application-form {
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.application-form button {
+    font-size: 20px;
+}
+
+.edit-button {
+    position: sticky;
+    font-size: 25px;
+    top: 90%;
+}
+
+.back-button {
+    font-size: 25px;
+    border-radius: 5px;
 }

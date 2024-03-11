@@ -17,8 +17,10 @@
                     <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
                     <td>{{ project.description }}</td>
                     <td>{{ project.get_status_display }}</td>
-                    <td><a href="{% url 'projects:project_update' project.pk %}">Редактировать информацию о проекте</a></td>
-                    <td><a href="{% url 'projects:checkpoints_update' project.pk %}">Редактировать контрольные точки</a></td>
+                    <td><a href="{% url 'projects:project_update' project.pk %}">Редактировать информацию о проекте</a>
+                    </td>
+                    <td><a href="{% url 'projects:checkpoints_update' project.pk %}">Редактировать контрольные точки</a>
+                    </td>
                     <td><a href="{% url 'projects:participants_list' project.pk %}">Управлять командой</a></td>
                 </tr>
             {% endfor %}
@@ -43,11 +45,8 @@
                         <a href="{% url 'projects:project_info' participant.project.pk %}">{{ participant.project.title }}</a>
                     </td>
                     <td>
-                        <form method="post"
-                              action="{% url 'projects:leave_project' participant.project.pk participant.custom_id %}">
-                            {% csrf_token %}
-                            <button type="submit">Отказаться от участия</button>
-                        </form>
+                        <a href="{% url 'projects:confirm_clear_participant' participant.project.pk participant.custom_id %}"
+                           class="application-form">Отказаться от участия</a>
                     </td>
                 </tr>
             {% endfor %}

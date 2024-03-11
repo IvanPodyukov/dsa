@@ -20,7 +20,7 @@
                 {% endfor %}
             </ul>
             {% if project.creator == request.user %}
-                <p>
+                <p class="edit-button">
                     <a href="{% url "projects:project_update" project.pk %}">
                         Редактировать информацию о проекте
                     </a>
@@ -63,7 +63,8 @@
                 {% endfor %}
             </table>
             {% if project.creator == request.user %}
-                <p><a href="{% url "projects:participants_list" project.pk %}">Управлять командой</a></p>
+                <p class="edit-button"><a href="{% url "projects:participants_list" project.pk %}">Управлять
+                    командой</a></p>
             {% endif %}
         </div>
         <div class="checkpoints-project">
@@ -95,5 +96,5 @@
             {% endif %}
         </div>
     </div>
-    <p><a href="{{ request.META.HTTP_REFERER }}" class="central-element">Назад</a></p>
+    <div><a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a></div>
 {% endblock %}

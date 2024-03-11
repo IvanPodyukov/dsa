@@ -28,14 +28,16 @@
                     <td>{{ application.created }}</td>
                     <td>
                         <form method="post"
-                              action="{% url 'projects:application_accept' participant.project.pk participant.custom_id application.custom_id %}">
+                              action="{% url 'projects:application_accept' participant.project.pk participant.custom_id application.custom_id %}"
+                              class="application-form">
                             {% csrf_token %}
                             <button type="submit">Одобрить</button>
                         </form>
                     </td>
                     <td>
                         <form method="post"
-                              action="{% url 'projects:application_reject' participant.project.pk participant.custom_id application.custom_id %}">
+                              action="{% url 'projects:application_reject' participant.project.pk participant.custom_id application.custom_id %}"
+                              class="application-form">
                             {% csrf_token %}
                             <button type="submit">Отклонить</button>
                         </form>

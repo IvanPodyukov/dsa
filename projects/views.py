@@ -10,7 +10,7 @@ from django_filters.views import FilterView
 
 from account.models import Interest
 from projects.filters import ProjectFilter
-from projects.mixins import UserIsCreatorRequiredMixin
+from projects.mixins import UserIsCreatorRequiredMixin, UserIsCreatorOrParticipantRequiredMixin
 from applications.models import Application
 from projects.forms import ProjectCreateForm, CheckpointFormSet, ParticipantCreateFormSet, ProjectUpdateForm, \
     CheckpointInlineFormSet
@@ -162,12 +162,23 @@ class ApplicationRejectView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View
         return redirect(reverse('projects:participant_applications_list', args=(pk, participant_pk)))
 
 
-class RemoveParticipantView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View):
+class ConfirmClearParticipantView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
+    def get(self, request, pk, participant_pk):
+        participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
+        if participant.participant == request.user:
+            message = 'отказаться от роли'
+        else:
+            message = 'удалить участника из роли'
+        return render(request, 'projects/confirm_clear_participant.html',
+                      {'participant': participant, 'message': message})
+
+
+class ClearParticipantView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
     def post(self, request, pk, participant_pk):
         participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
         participant.participant = None
         participant.save()
-        return redirect(reverse('projects:participants_list', args=(pk,)))
+        return redirect(reverse('projects:project_info', args=(pk,)))
 
 
 class MyProjectListView(LoginRequiredMixin, View):
@@ -180,14 +191,6 @@ class MyProjectListView(LoginRequiredMixin, View):
                           'my_projects': my_projects,
                           'my_participations': my_participations
                       })
-
-
-class ProjectLeaveView(LoginRequiredMixin, View):
-    def post(self, request, pk, participant_pk):
-        participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
-        participant.participant = None
-        participant.save()
-        return redirect(reverse('projects:my_projects_list'))
 
 
 class RecommendedProjectListView(LoginRequiredMixin, ListView):
