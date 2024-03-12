@@ -53,11 +53,13 @@ class UserViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         data = AuthUserSerializer(user).data
         return Response(data=data, status=status.HTTP_200_OK)
 
+    '''
     @action(detail=False, methods=['post'])
     def logout(self, request):
         logout(request)
         data = {'success': 'Sucessfully logged out'}
         return Response(data=data, status=status.HTTP_200_OK)
+    '''
 
 
 class ProfileViewSet(ListModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
@@ -130,7 +132,7 @@ class ProjectViewSet(ModelViewSet):
         return Response(serializer.data)
 
 
-class CheckpointViewSet(ListModelMixin, UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
+class CheckpointViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Checkpoint.objects.all()
     serializer_class = CheckpointReadOnlySerializer
     permission_classes = (CheckpointPermission,)
@@ -140,9 +142,6 @@ class CheckpointViewSet(ListModelMixin, UpdateModelMixin, RetrieveModelMixin, Ge
             return CheckpointUpdateSerializer
         return CheckpointReadOnlySerializer
 
-    def list(self, request, *args, **kwargs):
-        return Response({"detail": "Method \"GET\" not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
     @action(detail=False, methods=['get'])
     def mine(self, request):
         projects = Project.objects.filter(participants__in=request.user.participations.all())
@@ -151,13 +150,10 @@ class CheckpointViewSet(ListModelMixin, UpdateModelMixin, RetrieveModelMixin, Ge
         return Response(serializer.data)
 
 
-class ParticipantViewSet(ListModelMixin, UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
+class ParticipantViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Participant.objects.all()
     serializer_class = ParticipantSerializer
     permission_classes = (ParticipantPermission,)
-
-    def list(self, request, *args, **kwargs):
-        return Response({"detail": "Method \"GET\" not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=False, methods=['get'])
     def mine(self, request):

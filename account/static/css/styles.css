@@ -4,6 +4,7 @@
 
 body {
     font-family: Arial, sans-serif;
+    font-size: 20px;
     background-color: #ffffff;
     color: #000000;
     margin: 0;
@@ -71,6 +72,7 @@ form button {
     padding: 10px 15px;
     border-radius: 10px;
     cursor: pointer;
+    font-size: 20px;
 }
 
 nav form button {
@@ -104,6 +106,7 @@ form label, input, select {
     font-weight: bold;
     padding: 0 5px;
     margin: 0 10px;
+    font-size: 20px;
 }
 
 #id_tags {
@@ -224,4 +227,27 @@ h1 {
 .back-button {
     font-size: 25px;
     border-radius: 5px;
+}
+
+
+.edit-checkpoint {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.update-form {
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    align-items: center;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }

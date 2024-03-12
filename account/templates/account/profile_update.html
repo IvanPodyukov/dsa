@@ -2,10 +2,14 @@
 {% block title %}Редактировать профиль{% endblock %}
 {% block content %}
     <h1>Редактирование профиля</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить</button>
-    </form>
-    <p><a href="{% url 'account:profile' %}">Назад</a></p>
+    <div class="update-form">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="button-container">
+                <button type="submit">Сохранить</button>
+                <a href="{% url 'account:profile' %}" class="back-button">Назад</a>
+            </div>
+        </form>
+    </div>
 {% endblock %}

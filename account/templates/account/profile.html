@@ -2,21 +2,23 @@
 {% block title %}Профиль{% endblock %}
 {% block content %}
     <h1>Сведения об аккаунте</h1>
-    {% with user=request.user %}
-        <p>Никнейм: {{ user.username }}</p>
-        <p>Имя: {{ user.first_name }}</p>
-        <p>Фамилия: {{ user.last_name }}</p>
-        <p>Электронная почта: {{ user.email }}</p>
-        {% with profile=user.profile %}
-            <p>Номер телефона: {{ profile.phone }}</p>
-            <p>Резюме: <a href="{{ profile.get_absolute_file_upload_url }}">Ссылка</a></p>
-            <p>Научные интересы:</p>
-            <ul>
-                {% for interest in profile.interests.all %}
-                    <li>{{ interest.title }}</li>
-                {% endfor %}
-            </ul>
+    <div class="update-form">
+        {% with user=request.user %}
+            <p>Никнейм: {{ user.username }}</p>
+            <p>Имя: {{ user.first_name }}</p>
+            <p>Фамилия: {{ user.last_name }}</p>
+            <p>Электронная почта: {{ user.email }}</p>
+            {% with profile=user.profile %}
+                <p>Номер телефона: {{ profile.phone }}</p>
+                <p>Резюме: <a href="{{ profile.get_absolute_file_upload_url }}">Ссылка</a></p>
+                <p>Научные интересы:</p>
+                <ul>
+                    {% for interest in profile.interests.all %}
+                        <li>{{ interest.title }}</li>
+                    {% endfor %}
+                </ul>
+            {% endwith %}
         {% endwith %}
-    {% endwith %}
-    <p><a href="{% url 'account:profile_update' %}">Редактировать профиль</a></p>
+        <p><a href="{% url 'account:profile_update' %}">Редактировать профиль</a></p>
+    </div>
 {% endblock %}

@@ -26,7 +26,7 @@
                             заявки</a>
                     {% else %}
                         <a href="{% url 'projects:confirm_clear_participant' project.pk participant.custom_id %}"
-                           class="application-form">Удалить участника</a>
+                        class="edit-button">Удалить участника</a>
                     {% endif %}
                 </td>
             </tr>

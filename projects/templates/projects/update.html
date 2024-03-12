@@ -2,10 +2,14 @@
 {% block title %}Проект {{ project.title }}{% endblock %}
 {% block content %}
     <h1>Редактирование проекта</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить</button>
-    </form>
-    <p><a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a></p>
+    <div class="update-form">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="button-container">
+                <button type="submit">Сохранить</button>
+                <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
+            </div>
+        </form>
+    </div>
 {% endblock %}
