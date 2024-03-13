@@ -3,14 +3,14 @@
 {% block content %}
     <h1>Проекты</h1>
     <p><a href="{% url 'projects:project_create' %}">Создать проект</a></p>
-    <form method="get">
-        {% for field in filter.form %}
-            {{ field.label_tag }}
-            {{ field }}
-        {% endfor %}
-        <button type="submit">Filter</button>
-    </form>
     {% if projects %}
+        <form method="get">
+            {% for field in filter.form %}
+                {{ field.label_tag }}
+                {{ field }}
+            {% endfor %}
+            <button type="submit">Filter</button>
+        </form>
         <table class="info-table">
             <tr>
                 <th>Название</th>
@@ -19,6 +19,7 @@
                 <th>Дедлайн подачи заявки</th>
                 <th>Дедлайн завершения проекта</th>
                 <th>Дата создания проекта</th>
+                <th>Количество контрольных точек</th>
                 <th>Количество участников</th>
                 <th>Количество вакансий</th>
             </tr>
@@ -30,8 +31,9 @@
                     <td>{{ project.application_deadline }}</td>
                     <td>{{ project.completion_deadline }}</td>
                     <td>{{ project.created }}</td>
-                    <td>{{ project.number_of_participants }}</td>
-                    <td>{{ project.number_of_vacancies }}</td>
+                    <td>{{ project.checkpoints_num }}</td>
+                    <td>{{ project.participants_num }}</td>
+                    <td>{{ project.vacancies_num }}</td>
                 </tr>
             {% endfor %}
         </table>

@@ -8,6 +8,8 @@
                 <th>Название</th>
                 <th>Описание</th>
                 <th>Статус</th>
+                <th>Дата создания проекта</th>
+                <th>Дедлайн завершения проекта</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -17,6 +19,8 @@
                     <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
                     <td>{{ project.description }}</td>
                     <td>{{ project.get_status_display }}</td>
+                    <td>{{ project.created }}</td>
+                    <td>{{ project.completion_deadline }}</td>
                     <td><a href="{% url 'projects:project_update' project.pk %}">Редактировать информацию о проекте</a>
                     </td>
                     <td><a href="{% url 'projects:checkpoints_update' project.pk %}">Редактировать контрольные точки</a>
@@ -35,6 +39,8 @@
                 <th>Роль</th>
                 <th>Описание</th>
                 <th>Проект</th>
+                <th>Дата создания проекта</th>
+                <th>Дедлайн завершения проекта</th>
                 <th></th>
             </tr>
             {% for participant in my_participations %}
@@ -44,6 +50,8 @@
                     <td>
                         <a href="{% url 'projects:project_info' participant.project.pk %}">{{ participant.project.title }}</a>
                     </td>
+                    <td>{{ participant.project.created }}</td>
+                    <td>{{ participant.project.completion_deadline }}</td>
                     <td>
                         <a href="{% url 'projects:confirm_clear_participant' participant.project.pk participant.custom_id %}"
                            class="application-form">Отказаться от участия</a>

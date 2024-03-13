@@ -26,14 +26,8 @@ class Project(models.Model):
     completion_deadline = models.DateField()
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=VACANT)
     tags = models.ManyToManyField(Interest, related_name='projects')
-    checkpoints_num = models.IntegerField(default=1)
-    participants_num = models.IntegerField(default=1)
-
-    def number_of_participants(self):
-        return self.participants.count()
-
-    def number_of_vacancies(self):
-        return self.participants.filter(participant=None).count()
+    checkpoints_num = models.IntegerField(default=0)
+    participants_num = models.IntegerField(default=0)
 
 
 class Participant(models.Model):

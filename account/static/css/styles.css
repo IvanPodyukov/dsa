@@ -106,7 +106,7 @@ form label, input, select {
     font-weight: bold;
     padding: 0 5px;
     margin: 0 10px;
-    font-size: 20px;
+    font-size: 17px;
 }
 
 #id_tags {
@@ -250,4 +250,17 @@ h1 {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
+}
+
+.central-element {
+    display: table;
+    margin: 5px auto;
+}
+
+.central-element a {
+    margin-left: 50px;
+}
+
+.central-element button {
+    margin-right: 50px;
 }

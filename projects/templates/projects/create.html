@@ -43,12 +43,12 @@
             </div>
 
         </div>
-        <p>
-            <button type="submit" class="central-element">Создать</button>
-        </p>
+        <div class="button-container">
+            <button type="submit">Создать</button>
+            <a href="{% url 'projects:projects_list' %}" class="back-button">Назад</a>
+        </div>
     </form>
 
-    <p><a href="{% url 'projects:projects_list' %}" class="central-element">Назад</a></p>
     <script>
         let checkpointForm = document.querySelectorAll(".checkpoint-form")
         let participantForm = document.querySelectorAll(".participant-form")

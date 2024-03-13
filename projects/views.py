@@ -1,15 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Case, When, Value, ManyToManyField, Count, F
+from django.db.models import Case, When, Value, ManyToManyField, Count, F, Q
 from django.forms import forms
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
 
 from account.models import Interest
-from projects.filters import ProjectFilter
+from projects.filters import ProjectFilter, ProjectRecommendedFilter
 from projects.mixins import UserIsCreatorRequiredMixin, UserIsCreatorOrParticipantRequiredMixin
 from applications.models import Application
 from projects.forms import ProjectCreateForm, CheckpointFormSet, ParticipantCreateFormSet, ProjectUpdateForm, \
@@ -18,7 +18,8 @@ from projects.models import Project, Participant
 
 
 class ProjectListView(LoginRequiredMixin, FilterView):
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().annotate(
+        vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True))
     context_object_name = 'projects'
     template_name = 'projects/list.html'
     filterset_class = ProjectFilter
@@ -162,7 +163,7 @@ class ApplicationRejectView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View
         return redirect(reverse('projects:participant_applications_list', args=(pk, participant_pk)))
 
 
-class ConfirmClearParticipantView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
+class ParticipantConfirmClearView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
     def get(self, request, pk, participant_pk):
         participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
         if participant.participant == request.user:
@@ -173,7 +174,7 @@ class ConfirmClearParticipantView(LoginRequiredMixin, UserIsCreatorOrParticipant
                       {'participant': participant, 'message': message})
 
 
-class ClearParticipantView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
+class ParticipantClearView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
     def post(self, request, pk, participant_pk):
         participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
         participant.participant = None
@@ -193,15 +194,18 @@ class MyProjectListView(LoginRequiredMixin, View):
                       })
 
 
-class RecommendedProjectListView(LoginRequiredMixin, ListView):
+class RecommendedProjectListView(LoginRequiredMixin, FilterView):
     context_object_name = 'projects'
     template_name = 'projects/recommended_projects.html'
+    filterset_class = ProjectRecommendedFilter
 
     def get_queryset(self):
-        projects = Project.objects.filter(tags__interested_users=self.request.user.profile).annotate(
-            common_tags=Count('tags')
-        ).distinct()
-        return projects.order_by('-common_tags')
+        projects = Project.objects.exclude(status=Project.COMPLETED).filter(
+            tags__interested_users=self.request.user.profile).annotate(
+            vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
+            common_tags=Count('tags', distinct=True)
+        ).distinct().filter(vacancies_num__gt=0)
+        return projects
 
 
 class CheckpointUpdateView(LoginRequiredMixin, UpdateView):
@@ -224,6 +228,7 @@ class CheckpointUpdateView(LoginRequiredMixin, UpdateView):
             checkpoints.instance = self.object
             if checkpoints.is_valid():
                 self.object.checkpoints.all().delete()
+                self.object.checkpoints_num = 0
                 for checkpoint in checkpoints:
                     if checkpoint.cleaned_data['DELETE']:
                         continue
@@ -235,3 +240,18 @@ class CheckpointUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('projects:project_info', args=(self.object.pk,))
+
+
+class ProjectConfirmDeleteView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View):
+    def get(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        return render(request, 'projects/confirm_delete_project.html',
+                      {'project': project})
+
+
+class ProjectDeleteView(LoginRequiredMixin, UserIsCreatorRequiredMixin, DeleteView):
+    model = Project
+    template_name = 'projects/confirm_delete_project.html'
+
+    def get_success_url(self):
+        return reverse('projects:my_projects_list')

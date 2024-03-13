@@ -8,6 +8,7 @@
             {{ form.as_p }}
             <div class="button-container">
                 <button type="submit">Сохранить</button>
+                <a href="{% url 'projects:delete_project' project.pk %}" class="back-button">Удалить проект</a>
                 <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
             </div>
         </form>

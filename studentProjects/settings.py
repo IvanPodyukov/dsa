@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'checkpoints.apps.CheckpointsConfig',
     'rest_framework',
     'drf_yasg',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'django_extensions'
 ]
 
 MIDDLEWARE = [

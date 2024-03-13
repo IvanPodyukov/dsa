@@ -84,17 +84,22 @@
                         </tr>
                     {% endfor %}
                 </table>
-                {% if project.creator == request.user %}
-                    <p class="edit-button">
-                        <a href="{% url "projects:checkpoints_update" project.pk %}">
-                            Редактировать контрольные точки
-                        </a>
-                    </p>
-                {% endif %}
             {% else %}
                 <h2>Нет контрольных точек</h2>
             {% endif %}
+            {% if project.creator == request.user %}
+                <p class="edit-button">
+                    <a href="{% url "projects:checkpoints_update" project.pk %}">
+                        Редактировать контрольные точки
+                    </a>
+                </p>
+            {% endif %}
         </div>
     </div>
-    <div><a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a></div>
+    <div class="button-container">
+        <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
+        {% if project.creator == request.user %}
+            <a href="{% url 'projects:project_info' project.pk %}">Удалить проект</a>
+        {% endif %}
+    </div>
 {% endblock %}

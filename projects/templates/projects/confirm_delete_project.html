@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Подтверждение удаления проекта {{ project.title }}{% endblock %}
+{% block content %}
+    <h1>Вы действительно хотите удалить проект {{ project.title }}?</h1>
+    <form action="{% url 'projects:delete_project' project.pk %}" method="post">
+        {% csrf_token %}
+        <div class="central-element">
+            <button type="submit">Да</button>
+            <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
+        </div>
+    </form>
+{% endblock %}

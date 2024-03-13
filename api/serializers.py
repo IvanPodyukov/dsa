@@ -1,9 +1,10 @@
 import datetime
 
+from django.contrib.auth import password_validation
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from rest_framework.relations import HyperlinkedIdentityField, HyperlinkedRelatedField
+from rest_framework.fields import SerializerMethodField, CharField, FileField
 
 from account.models import Profile, Interest
 from checkpoints.models import Checkpoint
@@ -16,37 +17,63 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
-class ProfileReadOnlySerializer(serializers.HyperlinkedModelSerializer):
-    # interests = InterestSerializer(many=True)
-    interests = HyperlinkedRelatedField(view_name='api:interests-detail', read_only=True, many=True)
+class ProfileReadOnlySerializer(serializers.ModelSerializer):
+    interests = InterestSerializer(many=True)
 
     class Meta:
         model = Profile
         fields = ['id', 'phone', 'cv', 'interests']
 
 
-class ProfileWriteOnlySerializer(serializers.HyperlinkedModelSerializer):
+class ProfileWriteOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['phone', 'cv', 'interests']
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    profile = HyperlinkedRelatedField(view_name='api:profiles-detail', read_only=True)
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile', 'password']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
 
+class UserRegisterSerializer(serializers.ModelSerializer):
+    phone = CharField(max_length=15)
+    cv = FileField()
+    interests = serializers.PrimaryKeyRelatedField(queryset=Interest.objects.all(), many=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'cv', 'interests', 'password']
+        extra_kwargs = {'first_name': {'required': True},
+                        'last_name': {'required': True},
+                        'email': {'required': True}}
+
+    def validate_password(self, value):
+        password_validation.validate_password(value)
+        return value
+
+    def validate_email(self, value):
+        email = value
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError('Электронная почта уже используется.')
+        return email
+
+    def validate_username(self, value):
+        username = value
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError('Никнэйм уже используется.')
+        return username
+
+
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=300, required=True)
-    password = serializers.CharField(required=True, write_only=True)
+    email = CharField(max_length=300, required=True)
+    password = CharField(required=True, write_only=True)
 
 
 class AuthUserSerializer(serializers.ModelSerializer):
-    auth_token = serializers.SerializerMethodField()
+    auth_token = SerializerMethodField()
 
     class Meta:
         model = User
@@ -59,51 +86,64 @@ class AuthUserSerializer(serializers.ModelSerializer):
 
 
 class CheckpointReadOnlySerializer(serializers.HyperlinkedModelSerializer):
-    project = HyperlinkedRelatedField(view_name='api:projects-detail', read_only=True)
-
     class Meta:
         model = Checkpoint
-        fields = ['id', 'custom_id', 'title', 'description', 'deadline', 'project']
-        read_only_fields = ['custom_id']
+        fields = ['id', 'title', 'description', 'deadline']
 
 
-class CheckpointCreateSerializer(serializers.HyperlinkedModelSerializer):
+class CheckpointCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Checkpoint
         fields = ['title', 'description', 'deadline']
 
 
-class CheckpointUpdateSerializer(serializers.HyperlinkedModelSerializer):
+class CheckpointUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Checkpoint
         fields = ['title', 'description']
 
 
-class ParticipantSerializer(serializers.HyperlinkedModelSerializer):
-    participant = HyperlinkedRelatedField(view_name='api:users-detail', read_only=True)
-    project = HyperlinkedRelatedField(view_name='api:projects-detail', read_only=True)
-    applications = HyperlinkedRelatedField(view_name='api:applications-detail', read_only=True, many=True)
+class ParticipantSerializer(serializers.ModelSerializer):
+    participant = SerializerMethodField()
 
     class Meta:
         model = Participant
-        fields = ['id', 'title', 'description', 'participant', 'project', 'applications']
+        fields = ['id', 'title', 'description', 'participant']
+
+    def get_participant(self, obj):
+        if obj.participant is None:
+            return 'Нет участника'
+        return 'Есть участник'
 
 
-class ProjectReadOnlySerializer(serializers.HyperlinkedModelSerializer):
-    creator = HyperlinkedRelatedField(view_name='api:users-detail', read_only=True)
-    tags = HyperlinkedRelatedField(view_name='api:interests-detail', read_only=True, many=True)
-    checkpoints = HyperlinkedRelatedField(view_name='api:checkpoints-detail', read_only=True, many=True)
-    participants = HyperlinkedRelatedField(view_name='api:participants-detail', read_only=True, many=True)
+class ProjectReadOnlySerializer(serializers.ModelSerializer):
+    tags = InterestSerializer(many=True, read_only=True)
+    vacancies_num = SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'creator', 'created', 'description', 'application_deadline', 'completion_deadline',
-                  'status',
-                  'tags', 'checkpoints', 'participants']
+        fields = ['id', 'title', 'created', 'description', 'application_deadline', 'completion_deadline',
+                  'status', 'tags', 'checkpoints_num', 'participants_num', 'vacancies_num']
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return data
+    def get_vacancies_num(self, obj):
+        return obj.participants.all().filter(participant=None).count()
+
+
+class ProjectRecommendedSerializer(serializers.ModelSerializer):
+    tags = InterestSerializer(many=True, read_only=True)
+    common_tags = SerializerMethodField()
+    vacancies_num = SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'created', 'description', 'application_deadline', 'completion_deadline',
+                  'status', 'tags', 'common_tags', 'checkpoints_num', 'participants_num', 'vacancies_num']
+
+    def get_common_tags(self, obj):
+        return obj.common_tags
+
+    def get_vacancies_num(self, obj):
+        return obj.number_of_vacancies
 
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
@@ -116,7 +156,6 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
                   'participants', 'tags']
 
     def validate_participants(self, value):
-        print(self.context['view'].action)
         if len(value) == 0:
             raise serializers.ValidationError('Участников должно быть больше 0')
         return value
@@ -197,6 +236,7 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'checkpoints' in validated_data:
             instance.checkpoints.all().delete()
+            instance.checkpoints_num = 0
             checkpoints_data = validated_data.pop('checkpoints')
             for checkpoint_data in checkpoints_data:
                 Checkpoint.objects.create(project=instance, **checkpoint_data)
@@ -207,16 +247,10 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ApplicationReadOnlySerializer(serializers.HyperlinkedModelSerializer):
-    vacancy = HyperlinkedRelatedField(view_name='api:participants-detail', read_only=True)
-    applicant = HyperlinkedRelatedField(view_name='api:users-detail', read_only=True)
+class ApplicationReadOnlySerializer(serializers.ModelSerializer):
+    vacancy = ParticipantSerializer()
+    applicant = UserSerializer()
 
     class Meta:
         model = Participant
         fields = ['id', 'vacancy', 'applicant']
-
-
-class ApplicationWriteOnlySerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Participant
-        fields = ['vacancy', 'applicant']

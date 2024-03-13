@@ -11,8 +11,8 @@
             {% with profile=user.profile %}
                 <p>Номер телефона: {{ profile.phone }}</p>
                 <p>Резюме: <a href="{{ profile.get_absolute_file_upload_url }}">Ссылка</a></p>
-                <p>Научные интересы:</p>
-                <ul>
+                Научные интересы:
+                <ul class="tag-list">
                     {% for interest in profile.interests.all %}
                         <li>{{ interest.title }}</li>
                     {% endfor %}
