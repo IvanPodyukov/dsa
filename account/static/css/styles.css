@@ -105,7 +105,7 @@ form label, input, select {
     display: inline-block;
     font-weight: bold;
     padding: 0 5px;
-    margin: 0 10px;
+    margin: 0 5px;
     font-size: 17px;
 }
 
@@ -207,6 +207,8 @@ h1 {
 .add-button {
     display: flex;
     justify-content: center;
+    position: sticky;
+    top: 90%;
 }
 
 .application-form {

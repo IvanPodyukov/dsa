@@ -1,0 +1,51 @@
+[
+{
+    "model": "account.interest",
+    "pk": 1,
+    "fields": {
+        "title": "Математика"
+    }
+},
+{
+    "model": "account.interest",
+    "pk": 2,
+    "fields": {
+        "title": "Физика"
+    }
+},
+{
+    "model": "account.interest",
+    "pk": 3,
+    "fields": {
+        "title": "Химия"
+    }
+},
+{
+    "model": "account.interest",
+    "pk": 4,
+    "fields": {
+        "title": "Биология"
+    }
+},
+{
+    "model": "account.interest",
+    "pk": 5,
+    "fields": {
+        "title": "Информатика"
+    }
+},
+{
+    "model": "account.interest",
+    "pk": 6,
+    "fields": {
+        "title": "Лингвистика"
+    }
+},
+{
+    "model": "account.interest",
+    "pk": 7,
+    "fields": {
+        "title": "Искусственный интеллект"
+    }
+}
+]

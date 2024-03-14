@@ -99,7 +99,7 @@
     <div class="button-container">
         <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
         {% if project.creator == request.user %}
-            <a href="{% url 'projects:project_info' project.pk %}">Удалить проект</a>
+            <a href="{% url 'projects:project_info' project.pk %}" class="back-button">Удалить проект</a>
         {% endif %}
     </div>
 {% endblock %}
