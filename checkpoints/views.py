@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
 from django.views.generic import ListView
 
 from checkpoints.models import Checkpoint
@@ -14,3 +13,4 @@ class CheckpointListView(LoginRequiredMixin, ListView):
 
     template_name = 'checkpoints/list.html'
     context_object_name = 'checkpoints'
+    paginate_by = 5

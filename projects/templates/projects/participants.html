@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Заявки на участие в проекте {{ project.title }}{% endblock %}
+{% block title %}Роли в проекте {{ project.title }}{% endblock %}
 {% block content %}
     <h1>Роли в проекте</h1>
     <table class="info-table">
@@ -17,16 +17,18 @@
                     {% if participant.participant is NULL %}
                         Нет участника
                     {% else %}
-                        {{ participant.participant.username }}
+                        <a href="{% url 'account:user-detail' participant.participant.pk %}"
+                           class="edit-button">{{ participant.participant.full_name }}</a>
                     {% endif %}
                 </td>
                 <td>
                     {% if participant.participant is NULL %}
-                        <a href="{% url 'projects:participant_applications_list' project.pk participant.custom_id %}">Посмотреть
+                        <a href="{% url 'projects:participant_applications_list' project.pk participant.custom_id %}"
+                           class="edit-button">Посмотреть
                             заявки</a>
                     {% else %}
                         <a href="{% url 'projects:confirm_clear_participant' project.pk participant.custom_id %}"
-                        class="edit-button">Удалить участника</a>
+                           class="edit-button">Удалить участника</a>
                     {% endif %}
                 </td>
             </tr>

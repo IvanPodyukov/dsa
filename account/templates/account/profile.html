@@ -4,21 +4,35 @@
     <h1>Сведения об аккаунте</h1>
     <div class="update-form">
         {% with user=request.user %}
-            <p>Никнейм: {{ user.username }}</p>
-            <p>Имя: {{ user.first_name }}</p>
-            <p>Фамилия: {{ user.last_name }}</p>
+            <p>Полное имя: {{ user.full_name }}</p>
+            <p>Описание: {{ user.description }}</p>
             <p>Электронная почта: {{ user.email }}</p>
-            {% with profile=user.profile %}
-                <p>Номер телефона: {{ profile.phone }}</p>
-                <p>Резюме: <a href="{{ profile.get_absolute_file_upload_url }}">Ссылка</a></p>
-                Научные интересы:
-                <ul class="tag-list">
-                    {% for interest in profile.interests.all %}
-                        <li>{{ interest.title }}</li>
-                    {% endfor %}
-                </ul>
-            {% endwith %}
+            <p>Телефон:
+                {% if user.phone %}
+                    {{ user.phone }}
+                {% else %}
+                    Нет
+                {% endif %}
+            </p>
+            <p>Резюме:
+                {% if user.cv %}
+                    <a href="{{ user.get_absolute_file_upload_url }}">Ссылка</a>
+                {% else %}
+                    Нет
+                {% endif %}
+            </p>
+            <div>Научные интересы:
+                {% if user.interests.all %}
+                    <ul class="tag-list">
+                        {% for interest in user.interests.all %}
+                            <li>{{ interest.title }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    Нет
+                {% endif %}
+            </div>
         {% endwith %}
-        <p><a href="{% url 'account:profile_update' %}">Редактировать профиль</a></p>
+        <p><a href="{% url 'account:profile_update' %}" class="edit-button">Редактировать профиль</a></p>
     </div>
 {% endblock %}

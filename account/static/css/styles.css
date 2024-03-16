@@ -56,6 +56,10 @@ a {
     transition: background-color 0.3s ease;
 }
 
+.block {
+    display: block;
+}
+
 a:hover {
     background-color: #007bff;
     color: #ffffff;
@@ -265,4 +269,12 @@ h1 {
 
 .central-element button {
     margin-right: 50px;
+}
+
+.inline-elements, .inline-elements a {
+    display: inline;
+}
+
+table {
+    margin-bottom: 20px;
 }

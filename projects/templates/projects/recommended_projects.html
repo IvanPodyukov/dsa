@@ -30,9 +30,9 @@
                     <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
                     <td>{{ project.description }}</td>
                     <td>{{ project.get_status_display }}</td>
-                    <td>{{ project.application_deadline }}</td>
-                    <td>{{ project.completion_deadline }}</td>
-                    <td>{{ project.created }}</td>
+                    <td>{{ project.application_deadline|date:"d.m.Y" }}</td>
+                    <td>{{ project.completion_deadline|date:"d.m.Y" }}</td>
+                    <td>{{ project.created|date:"d.m.Y" }}</td>
                     <td>{{ project.checkpoints_num }}</td>
                     <td>{{ project.participants_num }}</td>
                     <td>{{ project.vacancies_num }}</td>
@@ -48,6 +48,7 @@
                 </tr>
             {% endfor %}
         </table>
+        {% include 'common/pagination.html' %}
     {% else %}
         <h2>Нет рекомендованных проектов</h2>
     {% endif %}

@@ -1,7 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
-from applications.models import Application
 from projects.models import Project, Participant
 
 

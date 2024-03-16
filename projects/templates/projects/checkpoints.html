@@ -10,15 +10,14 @@
                 {{ checkpoints.management_form }}
                 {% for checkpoint in checkpoints %}
                     <div class="checkpoint-form edit-checkpoint">
-                        {{ checkpoint.as_div }}
-                        <!-- <button id="remove-checkpoint-form" type="button">Удалить</button> -->
+                        {{ checkpoint.as_p }}
                     </div>
                 {% endfor %}
             </div>
             <div class="button-container">
                 <button id="add-checkpoint-form" type="button">Добавить контрольную точку</button>
                 <button type="submit" class="add-button">Сохранить</button>
-                <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
+                <a href="{% url 'projects:project_info' project.pk %}" class="back-button">Назад</a>
             </div>
         </form>
     </div>

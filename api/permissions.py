@@ -43,13 +43,3 @@ class CheckpointPermission(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_authenticated
-
-
-class ProfilePermission(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if view.action in ['update', 'partial_update']:
-            return request.user.is_authenticated and request.user.profile == obj
-        return request.user.is_authenticated
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated

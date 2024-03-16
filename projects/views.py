@@ -18,6 +18,7 @@ from projects.models import Project, Participant
 
 
 class ProjectListView(LoginRequiredMixin, FilterView):
+    paginate_by = 5
     queryset = Project.objects.all().annotate(
         vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True))
     context_object_name = 'projects'
@@ -198,10 +199,11 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
     context_object_name = 'projects'
     template_name = 'projects/recommended_projects.html'
     filterset_class = ProjectRecommendedFilter
+    paginate_by = 5
 
     def get_queryset(self):
         projects = Project.objects.exclude(status=Project.COMPLETED).filter(
-            tags__interested_users=self.request.user.profile).annotate(
+            tags__interested_users=self.request.user).annotate(
             vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
             common_tags=Count('tags', distinct=True)
         ).distinct().filter(vacancies_num__gt=0)
@@ -255,3 +257,5 @@ class ProjectDeleteView(LoginRequiredMixin, UserIsCreatorRequiredMixin, DeleteVi
 
     def get_success_url(self):
         return reverse('projects:my_projects_list')
+
+

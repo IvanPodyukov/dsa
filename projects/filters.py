@@ -31,6 +31,7 @@ class ProjectFilter(django_filters.FilterSet):
         fields = ['status']
 
 
+
 class ProjectRecommendedFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr='icontains')
     description = django_filters.CharFilter(lookup_expr='icontains')

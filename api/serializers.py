@@ -1,12 +1,12 @@
 import datetime
 
 from django.contrib.auth import password_validation
-from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.fields import SerializerMethodField, CharField, FileField
 
-from account.models import Profile, Interest
+from account.models import Interest, User
+from applications.models import Application
 from checkpoints.models import Checkpoint
 from projects.models import Project, Participant
 
@@ -17,58 +17,22 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
-class ProfileReadOnlySerializer(serializers.ModelSerializer):
+class UserInfoSerializer(serializers.ModelSerializer):
     interests = InterestSerializer(many=True)
 
     class Meta:
-        model = Profile
+        model = User
+        fields = ['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests']
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = ['id', 'phone', 'cv', 'interests']
 
 
-class ProfileWriteOnlySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['phone', 'cv', 'interests']
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
-
-
-class UserRegisterSerializer(serializers.ModelSerializer):
-    phone = CharField(max_length=15)
-    cv = FileField()
-    interests = serializers.PrimaryKeyRelatedField(queryset=Interest.objects.all(), many=True)
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'cv', 'interests', 'password']
-        extra_kwargs = {'first_name': {'required': True},
-                        'last_name': {'required': True},
-                        'email': {'required': True}}
-
-    def validate_password(self, value):
-        password_validation.validate_password(value)
-        return value
-
-    def validate_email(self, value):
-        email = value
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError('Электронная почта уже используется.')
-        return email
-
-    def validate_username(self, value):
-        username = value
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError('Никнэйм уже используется.')
-        return username
-
-
 class UserLoginSerializer(serializers.Serializer):
-    email = CharField(max_length=300, required=True)
+    email = CharField(max_length=50, required=True)
     password = CharField(required=True, write_only=True)
 
 
@@ -77,7 +41,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'auth_token']
+        fields = ['id', 'full_name', 'description', 'email', 'auth_token']
         read_only_fields = ['id']
 
     def get_auth_token(self, obj):
@@ -220,7 +184,8 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
         application_deadline = data.get('application_deadline', self.instance.application_deadline)
         if datetime.date.today() >= application_deadline:
             raise serializers.ValidationError('Дедлайн подачи заявки не может быть раньше сегодняшнего дня')
-        checkpoints = data.get('checkpoints', [])
+        checkpoints = data.get('checkpoints',
+                               [{'deadline': checkpoint.deadline} for checkpoint in self.instance.checkpoints.all()])
         if checkpoints and application_deadline >= checkpoints[0]['deadline']:
             raise serializers.ValidationError(
                 'Дедлайн контрольной точки не может быть раньше дедлайна подачи заявки')
@@ -249,8 +214,8 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
 
 class ApplicationReadOnlySerializer(serializers.ModelSerializer):
     vacancy = ParticipantSerializer()
-    applicant = UserSerializer()
+    applicant = UserInfoSerializer()
 
     class Meta:
-        model = Participant
+        model = Application
         fields = ['id', 'vacancy', 'applicant']

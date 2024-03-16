@@ -7,11 +7,12 @@
         <div class="detail-project">
             <h2>Информация о проекте</h2>
             <p>Название: {{ project.title }}</p>
-            <p>Создатель: {{ project.creator }}</p>
+            <p class="inline-elements">Создатель: <a
+                    href="{% url 'account:user-detail' project.creator.pk %}">Ссылка</a></p>
             <p>Описание: {{ project.description }}</p>
-            <p>Дата создания: {{ project.created }}</p>
-            <p>Дедлайн подачи заявки: {{ project.application_deadline }}</p>
-            <p>Срок завершения проекта: {{ project.completion_deadline }}</p>
+            <p>Дата создания: {{ project.created|date:"d.m.Y" }}</p>
+            <p>Дедлайн подачи заявки: {{ project.application_deadline|date:"d.m.Y" }}</p>
+            <p>Срок завершения проекта: {{ project.completion_deadline|date:"d.m.Y" }}</p>
             <p>Статус проекта: {{ project.get_status_display }}</p>
             Теги проекта:
             <ul class="tag-list">
@@ -80,7 +81,7 @@
                         <tr>
                             <td>{{ checkpoint.title }}</td>
                             <td>{{ checkpoint.description }}</td>
-                            <td>{{ checkpoint.deadline }}</td>
+                            <td>{{ checkpoint.deadline|date:"d.m.Y" }}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -96,10 +97,6 @@
             {% endif %}
         </div>
     </div>
-    <div class="button-container">
-        <a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a>
-        {% if project.creator == request.user %}
-            <a href="{% url 'projects:project_info' project.pk %}" class="back-button">Удалить проект</a>
-        {% endif %}
-    </div>
+
+    <p><a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a></p>
 {% endblock %}

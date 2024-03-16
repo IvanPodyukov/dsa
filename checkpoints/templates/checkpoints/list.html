@@ -17,10 +17,11 @@
                     <td>
                         <a href="{% url 'projects:project_info' checkpoint.project.pk %}">{{ checkpoint.project.title }}</a>
                     </td>
-                    <td>{{ checkpoint.deadline }}</td>
+                    <td>{{ checkpoint.deadline|date:"d.m.Y" }}</td>
                 </tr>
             {% endfor %}
         </table>
+        {% include 'common/pagination.html' %}
     {% else %}
         <h1>Контрольных точек нет</h1>
     {% endif %}

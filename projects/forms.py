@@ -145,9 +145,36 @@ class ProjectCreateForm(models.ModelForm):
 class ProjectUpdateForm(models.ModelForm):
     class Meta:
         model = Project
-        fields = ['title', 'description', 'status']
+        fields = ['title', 'description', 'status', 'application_deadline', 'completion_deadline']
+        widgets = {
+            'application_deadline': DateInput(attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+            }),
+            'completion_deadline': DateInput(attrs={
+                'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)',
+                'class': 'form-control'
+            }),
+        }
         labels = {
             'title': 'Название',
             'description': 'Описание',
-            'status': 'Статус'
+            'status': 'Статус',
+            'application_deadline': 'Дедлайн подачи заявки',
+            'completion_deadline': 'Срок завершения проекта',
         }
+
+    def clean(self):
+        super().clean()
+        completion_deadline = self.cleaned_data['completion_deadline']
+        application_deadline = self.cleaned_data['application_deadline']
+        if datetime.date.today() >= application_deadline:
+            raise forms.ValidationError('Дедлайн подачи заявки не может быть раньше сегодняшнего дня')
+        if completion_deadline <= application_deadline:
+            raise forms.ValidationError('Дедлайн выполнения проекта не может быть раньше дедлайна подачи заявок')
+        checkpoints = self.instance.checkpoints.all()
+        if checkpoints:
+            if application_deadline >= checkpoints[0].deadline:
+                raise forms.ValidationError('Дедлайн контрольной точки не может быть раньше дедлайна подачи заявок')
+            if completion_deadline <= checkpoints[len(checkpoints) - 1].deadline:
+                raise forms.ValidationError('Дедлайн контрольной точки не может быть позже дедлайна выполнения проекта')

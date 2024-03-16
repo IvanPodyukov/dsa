@@ -2,12 +2,12 @@
 {% block title %}Мои заявки{% endblock %}
 {% block content %}
     {% if applications %}
-        <h1>Таблица заявок</h1>
+        <h1>Таблица поданных заявок</h1>
         <table class="info-table">
             <tr>
                 <th>Проект</th>
                 <th>Вакансия</th>
-                <th>Дата создания</th>
+                <th>Время создания</th>
                 <th></th>
             </tr>
             {% for application in applications %}
@@ -16,7 +16,7 @@
                         <a href="{% url 'projects:project_info' application.vacancy.project.pk %}">{{ application.vacancy.project.title }}</a>
                     </td>
                     <td>{{ application.vacancy.title }}</td>
-                    <td>{{ application.created }}</td>
+                    <td>{{ application.created|date:"H:i d.m.Y" }}</td>
                     <td>
                         <form method="post"
                               action="{% url 'projects:project_withdraw' application.vacancy.project.pk application.vacancy.pk %}"
