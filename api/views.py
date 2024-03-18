@@ -16,7 +16,8 @@ from api.filters import ProjectFilterBackend
 
 from api.pagination import ProjectPagination, CheckpointPagination
 
-from api.permissions import ProjectPermission, ApplicationPermission, ParticipantPermission, CheckpointPermission
+from api.permissions import ProjectPermission, ApplicationPermission, ParticipantPermission, CheckpointPermission, \
+    UserPermission
 from api.serializers import UserInfoSerializer, InterestSerializer, ProjectReadOnlySerializer, \
     CheckpointReadOnlySerializer, ParticipantSerializer, ProjectCreateSerializer, \
     ApplicationReadOnlySerializer, UserLoginSerializer, AuthUserSerializer, ProjectUpdateSerializer, \
@@ -32,7 +33,7 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveMode
 
 class UserViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (UserPermission,)
 
     def get_serializer_class(self):
         if self.action == 'login':
@@ -46,6 +47,9 @@ class UserViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
             return []
         return super().get_permissions()
 
+    @swagger_auto_schema(responses={
+        201: AuthUserSerializer()
+    })
     @action(detail=False, methods=['post'])
     def login(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -54,6 +58,9 @@ class UserViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
         data = AuthUserSerializer(user).data
         return Response(data=data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(responses={
+        200: UserInfoSerializer()
+    })
     @action(detail=False, methods=['get'])
     def profile(self, request):
         user = request.user
@@ -106,8 +113,6 @@ class ProjectViewSet(ModelViewSet):
             return ProjectRecommendedSerializer
         if self.action == 'checkpoints':
             return CheckpointReadOnlySerializer
-        if self.action == 'creator':
-            return UserInfoSerializer
         if self.action == 'participants':
             return ParticipantSerializer
         return ProjectReadOnlySerializer
@@ -140,6 +145,9 @@ class ProjectViewSet(ModelViewSet):
         serializer = self.get_serializer(recommended_projects, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={
+        200: CheckpointReadOnlySerializer(many=True)
+    })
     @action(detail=True, methods=['get'])
     def checkpoints(self, request, pk=None):
         project = self.get_object()
@@ -147,13 +155,9 @@ class ProjectViewSet(ModelViewSet):
         serializer = self.get_serializer(checkpoints, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def creator(self, request, pk=None):
-        project = self.get_object()
-        creator = project.creator
-        serializer = self.get_serializer(creator)
-        return Response(serializer.data)
-
+    @swagger_auto_schema(responses={
+        200: ParticipantSerializer(many=True)
+    })
     @action(detail=True, methods=['get'])
     def participants(self, request, pk=None):
         project = self.get_object()
@@ -168,8 +172,6 @@ class CheckpointViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
     pagination_class = CheckpointPagination
 
     def get_serializer_class(self):
-        if self.action == 'project':
-            return ProjectReadOnlySerializer
         if self.action in ['update', 'partial_update']:
             return CheckpointUpdateSerializer
         return CheckpointReadOnlySerializer
@@ -186,26 +188,20 @@ class CheckpointViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
         serializer = self.get_serializer(checkpoints, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def project(self, request, pk=None):
-        checkpoint = self.get_object()
-        project = checkpoint.project
-        serializer = self.get_serializer(project)
-        return Response(serializer.data)
-
 
 class ParticipantViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Participant.objects.all()
     permission_classes = (ParticipantPermission,)
 
     def get_serializer_class(self):
-        if self.action in ['submit', 'applications']:
+        if self.action == 'applications':
             return ApplicationReadOnlySerializer
-        if self.action == 'project':
-            return ProjectReadOnlySerializer
-        if self.action == 'participant':
-            return UserInfoSerializer
         return ParticipantSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        if self.action in ['clear', 'submit']:
+            return None
+        return super().get_serializer(*args, **kwargs)
 
     @action(detail=False, methods=['get'])
     def mine(self, request):
@@ -213,15 +209,17 @@ class ParticipantViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
         serializer = self.get_serializer(participants, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={201: ApplicationReadOnlySerializer()})
     @action(detail=True, methods=['post'])
     def submit(self, request, pk=None):
         participant = self.get_object()
         if participant.participant is None:
             application, _ = Application.objects.get_or_create(vacancy=participant, applicant=request.user)
-            serializer = self.get_serializer(application)
+            serializer = ApplicationReadOnlySerializer(application, context={'request': request})
             return Response(serializer.data)
         return Response({"message": "Набор заявок закрыт на данную вакансию"}, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(responses={204: ""})
     @action(detail=True, methods=['post'])
     def clear(self, request, pk=None):
         participant = self.get_object()
@@ -230,25 +228,14 @@ class ParticipantViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
             participant.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @swagger_auto_schema(responses={
+        200: ApplicationReadOnlySerializer(many=True)
+    })
     @action(detail=True, methods=['get'])
     def applications(self, request, pk=None):
         participant = self.get_object()
         applications = participant.applications
         serializer = self.get_serializer(applications, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['get'])
-    def project(self, request, pk=None):
-        participant = self.get_object()
-        project = participant.project
-        serializer = self.get_serializer(project)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['get'])
-    def participant(self, request, pk=None):
-        participant = self.get_object()
-        user = participant.participant
-        serializer = self.get_serializer(user)
         return Response(serializer.data)
 
 
@@ -259,12 +246,18 @@ class ApplicationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
     def get_serializer_class(self):
         return ApplicationReadOnlySerializer
 
+    def get_serializer(self, *args, **kwargs):
+        if self.action == 'accept':
+            return None
+        return super().get_serializer(*args, **kwargs)
+
     @action(detail=False, methods=['get'])
     def mine(self, request):
         applications = Application.objects.filter(applicant=request.user)
         serializer = self.get_serializer(applications, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={204: ""})
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
         application = self.get_object()

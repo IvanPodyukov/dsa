@@ -46,14 +46,14 @@
                                 Есть
                             {% elif not isApplication %}
                                 <form method="post"
-                                      action="{% url 'projects:project_submit' project.pk participant.pk %}"
+                                      action="{% url 'projects:project_submit' project.pk participant.custom_id %}"
                                       class="application-form">
                                     {% csrf_token %}
                                     <button type="submit">Подать заявку</button>
                                 </form>
                             {% else %}
                                 <form method="post"
-                                      action="{% url 'projects:project_withdraw' project.pk participant.pk %}"
+                                      action="{% url 'projects:project_withdraw' project.pk participant.custom_id %}"
                                       class="application-form">
                                     {% csrf_token %}
                                     <button type="submit">Отозвать заявку</button>

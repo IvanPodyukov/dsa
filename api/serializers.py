@@ -49,10 +49,10 @@ class AuthUserSerializer(serializers.ModelSerializer):
         return token.key
 
 
-class CheckpointReadOnlySerializer(serializers.HyperlinkedModelSerializer):
+class CheckpointReadOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = Checkpoint
-        fields = ['id', 'title', 'description', 'deadline']
+        fields = ['id', 'project', 'title', 'description', 'deadline']
 
 
 class CheckpointCreateSerializer(serializers.ModelSerializer):
@@ -72,9 +72,16 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Participant
-        fields = ['id', 'title', 'description', 'participant']
+        fields = ['id', 'project', 'title', 'description', 'participant']
+        read_only_fields = ['project']
 
     def get_participant(self, obj):
+        participants_and_creator = list(obj.project.participants.all())
+        participants_and_creator.append(obj.project.creator)
+        if self.context['request'].user in participants_and_creator:
+            if obj.participant is None:
+                return None
+            return obj.participant.pk
         if obj.participant is None:
             return 'Нет участника'
         return 'Есть участник'
@@ -86,7 +93,7 @@ class ProjectReadOnlySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'created', 'description', 'application_deadline', 'completion_deadline',
+        fields = ['id', 'title', 'creator', 'created', 'description', 'application_deadline', 'completion_deadline',
                   'status', 'tags', 'checkpoints_num', 'participants_num', 'vacancies_num']
 
     def get_vacancies_num(self, obj):
@@ -116,7 +123,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['title', 'description', 'application_deadline', 'completion_deadline', 'status', 'checkpoints',
+        fields = ['title', 'description', 'application_deadline', 'completion_deadline', 'checkpoints',
                   'participants', 'tags']
 
     def validate_participants(self, value):

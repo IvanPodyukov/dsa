@@ -11,8 +11,3 @@ class ApplicationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Application.objects.filter(applicant=self.request.user)
-
-
-class ApplicationWithdrawView(LoginRequiredMixin, View):
-    def post(self):
-        pass

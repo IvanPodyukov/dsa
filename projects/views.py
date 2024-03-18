@@ -92,7 +92,7 @@ class ProjectUpdateView(LoginRequiredMixin, UserIsCreatorRequiredMixin, UpdateVi
 
 class ProjectSubmitView(LoginRequiredMixin, View):
     def post(self, request, project_pk, participant_pk):
-        participant = get_object_or_404(Participant, pk=participant_pk, project=project_pk)
+        participant = get_object_or_404(Participant, custom_id=participant_pk, project=project_pk)
         _, created = Application.objects.get_or_create(vacancy=participant, applicant=request.user)
         if created:
             messages.success(request, 'Заявка была создана')
@@ -106,7 +106,7 @@ class ProjectSubmitView(LoginRequiredMixin, View):
 
 class ProjectWithdrawView(LoginRequiredMixin, View):
     def post(self, request, project_pk, participant_pk):
-        participant = get_object_or_404(Participant, pk=participant_pk, project=project_pk)
+        participant = get_object_or_404(Participant, custom_id=participant_pk, project=project_pk)
         application = get_object_or_404(Application, vacancy=participant, applicant=request.user)
         application.delete()
         messages.success(request, 'Заявка отозвана')
@@ -210,7 +210,7 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
         return projects
 
 
-class CheckpointUpdateView(LoginRequiredMixin, UpdateView):
+class CheckpointUpdateView(LoginRequiredMixin, UserIsCreatorRequiredMixin, UpdateView):
     model = Project
     fields = []
     template_name = 'projects/checkpoints.html'
@@ -244,18 +244,9 @@ class CheckpointUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('projects:project_info', args=(self.object.pk,))
 
 
-class ProjectConfirmDeleteView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View):
-    def get(self, request, pk):
-        project = get_object_or_404(Project, pk=pk)
-        return render(request, 'projects/confirm_delete_project.html',
-                      {'project': project})
-
-
 class ProjectDeleteView(LoginRequiredMixin, UserIsCreatorRequiredMixin, DeleteView):
     model = Project
     template_name = 'projects/confirm_delete_project.html'
 
     def get_success_url(self):
         return reverse('projects:my_projects_list')
-
-
