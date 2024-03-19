@@ -22,7 +22,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests']
+        fields = ['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests', 'avatar']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

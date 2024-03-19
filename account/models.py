@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     description = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, null=True)
     cv = models.FileField(upload_to='cv/%Y/%m/%d', null=True)
+    avatar = models.URLField(null=True)
     interests = models.ManyToManyField(Interest, related_name='interested_users')
     is_staff = models.BooleanField(default=False)
 

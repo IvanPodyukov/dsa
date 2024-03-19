@@ -2,27 +2,35 @@
 {% block title %}Пользователь {{ user.full_name }}{% endblock %}
 {% block content %}
     <h1>Сведения о пользователе</h1>
-    <div class="update-form">
-        <p>Полное имя: {{ user.full_name }}</p>
-        <p>Описание: {{ user.description }}</p>
-        <p>Электронная почта: {{ user.email }}</p>
-        {% if user.phone %}
-            <p>Телефон: {{ user.phone }}</p>
-        {% endif %}
-        {% if user.cv %}
-            <p>Резюме:
-                <a href="{{ user.get_absolute_file_upload_url }}">Ссылка</a>
-            </p>
-        {% endif %}
-        {% if user.interests.all %}
-            <div>Научные интересы:
+    <div class="profile-container">
+        <div class="profile">
+            <p>Полное имя: {{ user.full_name }}</p>
+            <p>Описание: {{ user.description }}</p>
+            <p>Электронная почта: {{ user.email }}</p>
+            {% if user.phone %}
+                <p>Телефон: {{ user.phone }}</p>
+            {% endif %}
+            {% if user.cv %}
+                <p>Резюме:
+                    <a href="{{ user.get_absolute_file_upload_url }}">Ссылка</a>
+                </p>
+            {% endif %}
+            {% if user.interests.all %}
+                <div>Научные интересы:
 
-                <ul class="tag-list">
-                    {% for interest in user.interests.all %}
-                        <li>{{ interest.title }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+                    <ul class="tag-list">
+                        {% for interest in user.interests.all %}
+                            <li>{{ interest.title }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+        <div class="avatar">
+            {% if user.avatar %}
+                <p class="central-element">Аватар</p>
+                <img src="{{ user.avatar }}">
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

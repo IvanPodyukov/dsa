@@ -16,7 +16,7 @@ class Project(models.Model):
         (VACANT, "ЕСТЬ ВАКАНСИИ"),
     )
 
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=100)
     creator = models.ForeignKey(User,
                                 on_delete=models.CASCADE,
                                 related_name='created_projects')

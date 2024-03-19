@@ -2,37 +2,45 @@
 {% block title %}Профиль{% endblock %}
 {% block content %}
     <h1>Сведения об аккаунте</h1>
-    <div class="update-form">
-        {% with user=request.user %}
-            <p>Полное имя: {{ user.full_name }}</p>
-            <p>Описание: {{ user.description }}</p>
-            <p>Электронная почта: {{ user.email }}</p>
-            <p>Телефон:
-                {% if user.phone %}
-                    {{ user.phone }}
-                {% else %}
-                    Нет
-                {% endif %}
-            </p>
-            <p>Резюме:
-                {% if user.cv %}
-                    <a href="{{ user.get_absolute_file_upload_url }}">Ссылка</a>
-                {% else %}
-                    Нет
-                {% endif %}
-            </p>
-            <div>Научные интересы:
-                {% if user.interests.all %}
-                    <ul class="tag-list">
-                        {% for interest in user.interests.all %}
-                            <li>{{ interest.title }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    Нет
-                {% endif %}
-            </div>
-        {% endwith %}
-        <p><a href="{% url 'account:profile_update' %}" class="edit-button">Редактировать профиль</a></p>
+    <div class="profile-container">
+        <div class="profile">
+            {% with user=request.user %}
+                <p>Полное имя: {{ user.full_name }}</p>
+                <p>Описание: {{ user.description }}</p>
+                <p>Электронная почта: {{ user.email }}</p>
+                <p>Телефон:
+                    {% if user.phone %}
+                        {{ user.phone }}
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </p>
+                <p>Резюме:
+                    {% if user.cv %}
+                        <a href="{{ user.get_absolute_file_upload_url }}">Ссылка</a>
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </p>
+                <div>Научные интересы:
+                    {% if user.interests.all %}
+                        <ul class="tag-list">
+                            {% for interest in user.interests.all %}
+                                <li>{{ interest.title }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </div>
+            {% endwith %}
+            <p><a href="{% url 'account:profile_update' %}" class="edit-button">Редактировать профиль</a></p>
+        </div>
+        <div class="avatar">
+            {% if user.avatar %}
+                <p class="central-element">Аватар</p>
+                <img src="{{ user.avatar }}">
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
