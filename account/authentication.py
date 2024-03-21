@@ -24,6 +24,10 @@ class EmailAuthBackend(BaseBackend):
     def authenticate(self, request, email=None, password=None):
         try:
             user = User.objects.get(email=email)
+            if user.is_superuser:
+                if user.check_password(password):
+                    return user
+                return None
             response = self.get_token(email, password)
             if response.status_code == 400:
                 return None
