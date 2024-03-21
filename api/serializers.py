@@ -76,8 +76,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
         read_only_fields = ['project']
 
     def get_participant(self, obj):
-        participants_and_creator = list(obj.project.participants.all())
-        participants_and_creator.append(obj.project.creator)
+        participants_and_creator = set(x.participant for x in obj.project.participants.all())
+        participants_and_creator.add(obj.project.creator)
         if self.context['request'].user in participants_and_creator:
             if obj.participant is None:
                 return None
