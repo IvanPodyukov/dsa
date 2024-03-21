@@ -47,7 +47,8 @@ class EmailAuthBackend(BaseBackend):
             user = User.objects.create(email=email,
                                        password=password,
                                        description=response['description'],
-                                       full_name=response['full_name'])
+                                       full_name=response['full_name'],
+                                       avatar=response.get('avatar_url', None))
             return user
 
     def get_user(self, user_id):
