@@ -189,7 +189,7 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         application_deadline = data.get('application_deadline', self.instance.application_deadline)
-        if datetime.date.today() >= application_deadline:
+        if self.instance.application_deadline != application_deadline and datetime.date.today() >= application_deadline:
             raise serializers.ValidationError('Дедлайн подачи заявки не может быть раньше сегодняшнего дня')
         checkpoints = data.get('checkpoints',
                                [{'deadline': checkpoint.deadline} for checkpoint in self.instance.checkpoints.all()])

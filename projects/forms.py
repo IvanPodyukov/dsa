@@ -168,7 +168,7 @@ class ProjectUpdateForm(models.ModelForm):
         super().clean()
         completion_deadline = self.cleaned_data['completion_deadline']
         application_deadline = self.cleaned_data['application_deadline']
-        if datetime.date.today() >= application_deadline:
+        if self.instance.application_deadline != application_deadline and datetime.date.today() >= application_deadline:
             raise forms.ValidationError('Дедлайн подачи заявки не может быть раньше сегодняшнего дня')
         if completion_deadline <= application_deadline:
             raise forms.ValidationError('Дедлайн выполнения проекта не может быть раньше дедлайна подачи заявок')

@@ -98,5 +98,5 @@
         </div>
     </div>
 
-    <p><a href="{{ request.META.HTTP_REFERER }}" class="back-button">Назад</a></p>
+    <p><a href="{% url 'projects:projects_list' %}" class="back-button">Назад</a></p>
 {% endblock %}

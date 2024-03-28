@@ -10,10 +10,10 @@ from account.models import User
 class EmailAuthBackend(BaseBackend):
 
     def get_token(self, email, password):
-        return requests.post('https://auth.hse.ru/adfs/oauth2/token', data={
+        return requests.post('https://saml.hse.ru/realms/hse/protocol/openid-connect/token', data={
             'username': email,
             'password': password,
-            'client_id': '40be8ab1-afde-4635-85d8-4cb834d88594',
+            'client_id': 'app-x-android',
             'grant_type': 'password'
         }, verify=False)
 
