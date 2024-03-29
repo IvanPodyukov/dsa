@@ -47,6 +47,7 @@ urlpatterns = [
     path('projects/', include('projects.urls')),
     path('applications/', include('applications.urls')),
     path('checkpoints/', include('checkpoints.urls')),
+    path('notifications/', include('notifications.urls')),
     path('', views.main, name='main')
 ]
 

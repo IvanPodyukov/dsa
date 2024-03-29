@@ -44,4 +44,5 @@
     {% else %}
         <h2>Заявок нет</h2>
     {% endif %}
+    <p><a href="{% url 'projects:participants_list' participant.project.pk %}" class="back-button">Назад</a></p>
 {% endblock %}

@@ -1,4 +1,5 @@
 {% load static %}
+{% load notifications_tags %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,6 +20,8 @@
                 <li><a href="{% url 'applications:applications_list' %}">Мои заявки</a></li>
                 <li><a href="{% url 'checkpoints:checkpoints_list' %}">Мои контрольные точки</a></li>
                 <li><a href="{% url 'account:profile' %}">Личный кабинет</a></li>
+                <li><a href="{% url 'notifications:notifications_list' %}">Уведомления
+                    ({% unreadNotifications request.user %})</a></li>
                 <li>
                     <form action="{% url 'account:logout' %}" method="POST">
                         {% csrf_token %}

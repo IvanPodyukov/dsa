@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from django.db import models
+from django.urls import reverse
 
 from account.models import Interest, User
 
@@ -28,6 +29,9 @@ class Project(models.Model):
     tags = models.ManyToManyField(Interest, related_name='projects')
     checkpoints_num = models.IntegerField(default=0)
     participants_num = models.IntegerField(default=0)
+
+    def get_absolute_url(self):
+        return reverse('projects:project_info', args=(self.id, ))
 
 
 class Participant(models.Model):

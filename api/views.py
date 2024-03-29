@@ -17,14 +17,15 @@ from api.filters import ProjectFilterBackend
 from api.pagination import ProjectPagination, CheckpointPagination
 
 from api.permissions import ProjectPermission, ApplicationPermission, ParticipantPermission, CheckpointPermission, \
-    UserPermission
+    UserPermission, NotificationPermission
 from api.serializers import UserInfoSerializer, InterestSerializer, ProjectReadOnlySerializer, \
     CheckpointReadOnlySerializer, ParticipantSerializer, ProjectCreateSerializer, \
     ApplicationReadOnlySerializer, UserLoginSerializer, AuthUserSerializer, ProjectUpdateSerializer, \
-    CheckpointUpdateSerializer, ProjectRecommendedSerializer, UserUpdateSerializer
+    CheckpointUpdateSerializer, ProjectRecommendedSerializer, UserUpdateSerializer, NotificationSerializer
 from api.utils import get_and_authenticate_user
 from applications.models import Application
 from checkpoints.models import Checkpoint
+from notifications.models import Notification
 from projects.filters import ProjectFilter
 from projects.models import Project, Participant
 
@@ -265,4 +266,53 @@ class ApplicationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
         participant.participant = application.applicant
         participant.applications.all().delete()
         participant.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class NotificationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    queryset = Notification.objects.all()
+    permission_classes = (NotificationPermission,)
+
+    def get_serializer_class(self):
+        return NotificationSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        if self.action in ['read', 'unread', 'read_all', 'unread_all']:
+            return None
+        return super().get_serializer(*args, **kwargs)
+
+    @action(detail=False, methods=['get'])
+    def mine(self, request):
+        notifications = request.user.notifications.all()
+        serializer = self.get_serializer(notifications, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(responses={204: ""})
+    @action(detail=False, methods=['post'])
+    def read_all(self, request):
+        notifications = request.user.notifications.all()
+        notifications.update(unread=False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(responses={204: ""})
+    @action(detail=False, methods=['post'])
+    def unread_all(self, request):
+        notifications = request.user.notifications.all()
+        notifications.update(unread=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(responses={204: ""})
+    @action(detail=True, methods=['post'])
+    def read(self, request, pk):
+        notification = self.get_object()
+        notification.unread = False
+        notification.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(responses={204: ""})
+    @action(detail=True, methods=['post'])
+    def unread(self, request, pk):
+        notification = self.get_object()
+        notification.unread = True
+        notification.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

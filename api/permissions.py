@@ -53,3 +53,13 @@ class CheckpointPermission(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_authenticated
+
+
+class NotificationPermission(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if view.action == 'retrieve':
+            return request.user.is_authenticated
+        return request.user.is_authenticated and obj.user == request.user
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated

@@ -306,3 +306,11 @@ table {
 .profile {
     flex-grow: 1;
 }
+
+.unread {
+    background-color: #ff8b8b;
+}
+
+.read {
+    background-color: #6fd57f;
+}

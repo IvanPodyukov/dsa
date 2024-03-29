@@ -8,6 +8,7 @@ from rest_framework.fields import SerializerMethodField, CharField, FileField
 from account.models import Interest, User
 from applications.models import Application
 from checkpoints.models import Checkpoint
+from notifications.models import Notification
 from projects.models import Project, Participant
 
 
@@ -226,3 +227,9 @@ class ApplicationReadOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ['id', 'vacancy', 'applicant']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'text', 'unread', 'timestamp']

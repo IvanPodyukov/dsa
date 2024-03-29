@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Список уведомлений{% endblock %}
+{% block content %}
+    <h1>Уведомления</h1>
+    {% if notifications %}
+        <div class="button-container">
+            <form action="{% url 'notifications:read_all_notifications' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Отметить все уведомления прочитанными</button>
+            </form>
+            <form action="{% url 'notifications:unread_all_notifications' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Отметить все уведомления непрочитанными</button>
+            </form>
+            <form action="{% url 'notifications:clear_all_notifications' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Удалить все уведомления</button>
+            </form>
+        </div>
+        <table class="info-table">
+            <tr>
+                <th>Текст</th>
+                <th>Время</th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for notification in notifications %}
+                {% if notification.unread %}
+                    <tr class="unread">
+                        <td>{{ notification.text }}</td>
+                        <td>{{ notification.timestamp|date:"H:i d.m.Y" }}</td>
+                        <td>
+                            <form action="{% url 'notifications:read_notification' notification.pk %}" method="POST"
+                                  class="inline-elements">
+                                {% csrf_token %}
+                                <button type="submit">Отметить прочитанным</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="{% url 'notifications:clear_notification' notification.pk %}" method="POST"
+                                  class="inline-elements">
+                                {% csrf_token %}
+                                <button type="submit">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr class="read">
+                        <td>{{ notification.text }}</td>
+                        <td>{{ notification.timestamp|date:"H:i d.m.Y" }}</td>
+                        <td>
+                            <form action="{% url 'notifications:unread_notification' notification.pk %}" method="POST"
+                                  class="inline-elements">
+                                {% csrf_token %}
+                                <button type="submit">Отметить непрочитанным</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="{% url 'notifications:clear_notification' notification.pk %}" method="POST"
+                                  class="inline-elements">
+                                {% csrf_token %}
+                                <button type="submit">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        {% include 'common/pagination.html' %}
+    {% else %}
+        <h2>Нет уведомлений</h2>
+    {% endif %}
+{% endblock %}

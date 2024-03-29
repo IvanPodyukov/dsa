@@ -9,6 +9,7 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView, D
 from django_filters.views import FilterView
 
 from account.models import Interest
+from notifications.models import Notification
 from projects.filters import ProjectFilter, ProjectRecommendedFilter
 from projects.mixins import UserIsCreatorRequiredMixin, UserIsCreatorOrParticipantRequiredMixin
 from applications.models import Application
@@ -152,7 +153,14 @@ class ApplicationAcceptView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View
         application = get_object_or_404(Application, custom_id=application_pk, vacancy=participant)
         participant.participant = application.applicant
         participant.save()
-        participant.applications.all().delete()
+        text = f'Ваша заявка на роль {participant.title} в проекте {participant.project.title} одобрена'
+        Notification.objects.create(user=application.applicant, text=text)
+        application.delete()
+        remaining_applications = participant.applications.all()
+        text = f'Ваша заявка на роль {participant.title} в проекте {participant.project.title} отклонена'
+        for application in remaining_applications:
+            Notification.objects.create(user=application.applicant, text=text)
+            application.delete()
         return redirect(reverse('projects:participants_list', args=(pk,)))
 
 
@@ -160,6 +168,8 @@ class ApplicationRejectView(LoginRequiredMixin, UserIsCreatorRequiredMixin, View
     def post(self, request, pk, participant_pk, application_pk):
         participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
         application = get_object_or_404(Application, custom_id=application_pk, vacancy=participant)
+        text = f'Ваша заявка на роль {participant.title} в проекте {participant.project.title} отклонена'
+        Notification.objects.create(user=application.applicant, text=text)
         application.delete()
         return redirect(reverse('projects:participant_applications_list', args=(pk, participant_pk)))
 
@@ -178,6 +188,9 @@ class ParticipantConfirmClearView(LoginRequiredMixin, UserIsCreatorOrParticipant
 class ParticipantClearView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
     def post(self, request, pk, participant_pk):
         participant = get_object_or_404(Participant, custom_id=participant_pk, project=pk)
+        if participant.project.creator == request.user:
+            text = f'Вы были удалены с роли {participant.title} в проекте {participant.project.title}'
+            Notification.objects.create(user=participant.participant, text=text)
         participant.participant = None
         participant.save()
         return redirect(reverse('projects:project_info', args=(pk,)))
