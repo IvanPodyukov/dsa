@@ -5,7 +5,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from account.models import User, Interest
-from projects.models import Project, Participant
+from participants.models import Participant
+from projects.models import Project
 
 
 class UserApiTestCase(TestCase):
@@ -21,7 +22,7 @@ class UserApiTestCase(TestCase):
 
     def set_credentials(self, user):
         token, _ = Token.objects.get_or_create(user=user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_HSE_AUTH=token.key)
 
     def test_api_login(self):
         response = self.client.post('/api/users/login/', {'email': self.user1.email, 'password': '1243'}, format='json')
@@ -36,7 +37,7 @@ class UserApiTestCase(TestCase):
         self.set_credentials(self.user1)
         response = self.client.get('/api/users/profile/', format='json')
         data = response.json()
-        self.assertEqual(['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests'], list(data.keys()))
+        self.assertEqual(['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests', 'avatar'], list(data.keys()))
         self.assertEqual(data['id'], self.user1.id)
         self.assertEqual(data['email'], self.user1.email)
         self.client.credentials()
@@ -49,7 +50,7 @@ class UserApiTestCase(TestCase):
         self.set_credentials(self.user1)
         response = self.client.get(f'/api/users/{self.user2.pk}/', format='json')
         data = response.json()
-        self.assertEqual(['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests'], list(data.keys()))
+        self.assertEqual(['id', 'full_name', 'description', 'email', 'phone', 'cv', 'interests', 'avatar'], list(data.keys()))
         self.assertEqual(data['id'], self.user2.id)
         self.assertEqual(data['email'], self.user2.email)
         self.client.credentials()
@@ -133,7 +134,7 @@ class InterestApiTestCase(TestCase):
 
     def set_credentials(self, user):
         token, _ = Token.objects.get_or_create(user=user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_HSE_AUTH=token.key)
 
     def test_api_interests_list_authorized(self):
         self.set_credentials(self.user1)
@@ -203,7 +204,7 @@ class ProjectApiTestCase(TestCase):
 
     def set_credentials(self, user):
         token, _ = Token.objects.get_or_create(user=user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_HSE_AUTH=token.key)
 
     def test_api_project_create_authorized(self):
         self.set_credentials(self.user1)

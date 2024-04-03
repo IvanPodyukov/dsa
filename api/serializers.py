@@ -9,7 +9,8 @@ from account.models import Interest, User
 from applications.models import Application
 from checkpoints.models import Checkpoint
 from notifications.models import Notification
-from projects.models import Project, Participant
+from participants.models import Participant
+from projects.models import Project
 
 
 class InterestSerializer(serializers.ModelSerializer):
@@ -91,6 +92,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
 class ProjectReadOnlySerializer(serializers.ModelSerializer):
     tags = InterestSerializer(many=True, read_only=True)
     vacancies_num = SerializerMethodField()
+    checkpoints_num = SerializerMethodField()
+    participants_num = SerializerMethodField()
 
     class Meta:
         model = Project
@@ -98,13 +101,21 @@ class ProjectReadOnlySerializer(serializers.ModelSerializer):
                   'status', 'tags', 'checkpoints_num', 'participants_num', 'vacancies_num']
 
     def get_vacancies_num(self, obj):
-        return obj.participants.all().filter(participant=None).count()
+        return obj.participants.filter(participant=None).count()
+
+    def get_checkpoints_num(self, obj):
+        return obj.checkpoints.count()
+
+    def get_participants_num(self, obj):
+        return obj.participants.count()
 
 
 class ProjectRecommendedSerializer(serializers.ModelSerializer):
     tags = InterestSerializer(many=True, read_only=True)
     common_tags = SerializerMethodField()
     vacancies_num = SerializerMethodField()
+    checkpoints_num = SerializerMethodField()
+    participants_num = SerializerMethodField()
 
     class Meta:
         model = Project
@@ -116,6 +127,12 @@ class ProjectRecommendedSerializer(serializers.ModelSerializer):
 
     def get_vacancies_num(self, obj):
         return obj.number_of_vacancies
+
+    def get_checkpoints_num(self, obj):
+        return obj.checkpoints.count()
+
+    def get_participants_num(self, obj):
+        return obj.participants.count()
 
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
@@ -209,7 +226,6 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'checkpoints' in validated_data:
             instance.checkpoints.all().delete()
-            instance.checkpoints_num = 0
             checkpoints_data = validated_data.pop('checkpoints')
             for checkpoint_data in checkpoints_data:
                 Checkpoint.objects.create(project=instance, **checkpoint_data)

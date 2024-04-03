@@ -19,7 +19,7 @@
                     <td>{{ application.created|date:"H:i d.m.Y" }}</td>
                     <td>
                         <form method="post"
-                              action="{% url 'projects:project_withdraw' application.vacancy.project.pk application.vacancy.pk %}"
+                              action="{% url 'participants:participant_withdraw' application.vacancy.pk %}"
                               class="application-form">
                             {% csrf_token %}
                             <button type="submit">Отозвать заявку</button>

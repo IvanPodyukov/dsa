@@ -23,11 +23,11 @@
                 </td>
                 <td>
                     {% if participant.participant is NULL %}
-                        <a href="{% url 'projects:participant_applications_list' project.pk participant.custom_id %}"
+                        <a href="{% url 'participants:participant_applications_list' participant.pk %}"
                            class="edit-button">Посмотреть
                             заявки</a>
                     {% else %}
-                        <a href="{% url 'projects:confirm_clear_participant' project.pk participant.custom_id %}"
+                        <a href="{% url 'participants:confirm_clear_participant' participant.pk %}"
                            class="edit-button">Удалить участника</a>
                     {% endif %}
                 </td>

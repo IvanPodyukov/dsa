@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from applications.models import Application
-from projects.models import Participant
+from participants.models import Participant
 
 
 class ApplicationInline(admin.StackedInline):

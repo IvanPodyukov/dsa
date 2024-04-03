@@ -6,7 +6,8 @@ from django.urls import reverse
 from account.models import User, Interest
 from api.serializers import ProjectUpdateSerializer
 from applications.models import Application
-from projects.models import Project, Participant
+from participants.models import Participant
+from projects.models import Project
 
 
 class ProjectTestCase(TestCase):
@@ -110,7 +111,7 @@ class ProjectTestCase(TestCase):
         self.client.login(email=self.user1.email)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('projects:project_submit', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_submit', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/')
@@ -121,7 +122,7 @@ class ProjectTestCase(TestCase):
     def test_project_submit_unauthorized(self):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('projects:project_submit', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_submit', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -132,7 +133,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         Application.objects.create(applicant=self.user1, vacancy=participant)
-        url = reverse('projects:project_withdraw', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_withdraw', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/')
@@ -144,7 +145,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         Application.objects.create(applicant=self.user1, vacancy=participant)
-        url = reverse('projects:project_withdraw', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_withdraw', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -181,7 +182,7 @@ class ProjectTestCase(TestCase):
     def test_applications_list_unauthorized(self):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('projects:participant_applications_list', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_applications_list', args=(participant.pk,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -191,7 +192,7 @@ class ProjectTestCase(TestCase):
         self.client.login(email=self.user1.email)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('projects:participant_applications_list', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_applications_list', args=(participant.pk,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.client.logout()
@@ -203,7 +204,7 @@ class ProjectTestCase(TestCase):
         new_project_info['creator'] = self.user2
         project = Project.objects.create(**new_project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('projects:participant_applications_list', args=(project.pk, participant.custom_id))
+        url = reverse('participants:participant_applications_list', args=(participant.pk,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
         self.client.logout()
@@ -213,7 +214,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('projects:application_accept', args=(project.pk, participant.custom_id, application.custom_id))
+        url = reverse('applications:application_accept', args=(application.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -224,7 +225,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('projects:application_accept', args=(project.pk, participant.custom_id, application.custom_id))
+        url = reverse('applications:application_accept', args=(application.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('projects:participants_list', args=(project.pk,)))
@@ -242,7 +243,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**new_project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         application = Application.objects.create(vacancy=participant, applicant=self.user1)
-        url = reverse('projects:application_accept', args=(project.pk, participant.custom_id, application.custom_id))
+        url = reverse('applications:application_accept', args=(application.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
         self.client.logout()
@@ -252,7 +253,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('projects:application_reject', args=(project.pk, participant.custom_id, application.custom_id))
+        url = reverse('applications:application_reject', args=(application.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -263,11 +264,11 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('projects:application_reject', args=(project.pk, participant.custom_id, application.custom_id))
+        url = reverse('applications:application_reject', args=(application.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('projects:participant_applications_list',
-                                               args=(project.pk, participant.custom_id)))
+        self.assertRedirects(response, reverse('participants:participant_applications_list',
+                                               args=(participant.pk,)))
         self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user2).exists())
         self.client.logout()
         project.delete()
@@ -279,7 +280,7 @@ class ProjectTestCase(TestCase):
         project = Project.objects.create(**new_project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
         application = Application.objects.create(vacancy=participant, applicant=self.user1)
-        url = reverse('projects:application_reject', args=(project.pk, participant.custom_id, application.custom_id))
+        url = reverse('applications:application_reject', args=(application.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
         self.client.logout()
@@ -288,7 +289,7 @@ class ProjectTestCase(TestCase):
     def test_participant_confirm_clear_unauthorized(self):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('projects:confirm_clear_participant', args=(project.pk, participant.custom_id))
+        url = reverse('participants:confirm_clear_participant', args=(participant.pk,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -298,7 +299,7 @@ class ProjectTestCase(TestCase):
         self.client.login(email=self.user1.email)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('projects:confirm_clear_participant', args=(project.pk, participant.custom_id))
+        url = reverse('participants:confirm_clear_participant', args=(participant.pk,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.client.logout()
@@ -310,7 +311,7 @@ class ProjectTestCase(TestCase):
         new_project_info['creator'] = self.user2
         project = Project.objects.create(**new_project_info)
         participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user2)
-        url = reverse('projects:confirm_clear_participant', args=(project.pk, participant.custom_id))
+        url = reverse('participants:confirm_clear_participant', args=(participant.pk,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
         self.client.logout()
@@ -319,7 +320,7 @@ class ProjectTestCase(TestCase):
     def test_participant_clear_unauthorized(self):
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('projects:clear_participant', args=(project.pk, participant.custom_id))
+        url = reverse('participants:clear_participant', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
@@ -329,7 +330,7 @@ class ProjectTestCase(TestCase):
         self.client.login(email=self.user1.email)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('projects:clear_participant', args=(project.pk, participant.custom_id))
+        url = reverse('participants:clear_participant', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('projects:project_info', args=(project.pk,)))
@@ -344,7 +345,7 @@ class ProjectTestCase(TestCase):
         new_project_info['creator'] = self.user2
         project = Project.objects.create(**new_project_info)
         participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user2)
-        url = reverse('projects:clear_participant', args=(project.pk, participant.custom_id))
+        url = reverse('participants:clear_participant', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
         project.delete()

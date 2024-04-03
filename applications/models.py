@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from account.models import User
-from projects.models import Participant
+from participants.models import Participant
 
 
 class Application(models.Model):
@@ -26,12 +26,3 @@ class Application(models.Model):
                                   related_name='applications')
     created = models.DateTimeField(auto_now_add=True)
     # status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=SUBMITTED)
-
-    custom_id = models.IntegerField(null=True)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.custom_id = self.vacancy.applications_num
-            self.vacancy.applications_num += 1
-            self.vacancy.save()
-        super().save(*args, **kwargs)

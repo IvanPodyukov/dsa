@@ -24,7 +24,7 @@
                     <td>{{ application.created|date:"H:i d.m.Y" }}</td>
                     <td>
                         <form method="post"
-                              action="{% url 'projects:application_accept' participant.project.pk participant.custom_id application.custom_id %}"
+                              action="{% url 'applications:application_accept' application.pk %}"
                               class="application-form">
                             {% csrf_token %}
                             <button type="submit">Одобрить</button>
@@ -32,7 +32,7 @@
                     </td>
                     <td>
                         <form method="post"
-                              action="{% url 'projects:application_reject' participant.project.pk participant.custom_id application.custom_id %}"
+                              action="{% url 'applications:application_reject' application.pk %}"
                               class="application-form">
                             {% csrf_token %}
                             <button type="submit">Отклонить</button>

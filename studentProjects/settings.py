@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework.authtoken',
     'django_extensions',
-    'notifications.apps.NotificationsConfig'
+    'notifications.apps.NotificationsConfig',
+    'participants.apps.ParticipantsConfig'
 ]
 
 MIDDLEWARE = [

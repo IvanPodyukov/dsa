@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Мои проекты{% endblock %}
+{% block title %}Созданные проекты{% endblock %}
 {% block content %}
     <h1>Созданные проекты</h1>
-    {% if my_projects %}
+    {% if projects %}
         <table class="info-table">
             <tr>
                 <th>Название</th>
@@ -12,7 +12,7 @@
                 <th>Дедлайн завершения проекта</th>
                 <th>Карточка проекта</th>
             </tr>
-            {% for project in my_projects %}
+            {% for project in projects %}
                 <tr>
                     <td>{{ project.title }}</td>
                     <td>{{ project.description }}</td>
@@ -26,35 +26,5 @@
         </table>
     {% else %}
         <h2>Нет созданных проектов</h2>
-    {% endif %}
-    <h1>Участвую в проектах</h1>
-    {% if my_participations %}
-        <table class="info-table">
-            <tr>
-                <th>Роль</th>
-                <th>Описание</th>
-                <th>Проект</th>
-                <th>Дата создания проекта</th>
-                <th>Дедлайн завершения проекта</th>
-                <th></th>
-            </tr>
-            {% for participant in my_participations %}
-                <tr>
-                    <td>{{ participant.title }}</td>
-                    <td>{{ participant.description }}</td>
-                    <td>
-                        <a href="{% url 'projects:project_info' participant.project.pk %}">{{ participant.project.title }}</a>
-                    </td>
-                    <td>{{ participant.project.created|date:"d.m.Y" }}</td>
-                    <td>{{ participant.project.completion_deadline|date:"d.m.Y" }}</td>
-                    <td>
-                        <a href="{% url 'projects:confirm_clear_participant' participant.project.pk participant.custom_id %}"
-                           class="application-form">Отказаться от участия</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <h2>Нет текущих проектов</h2>
     {% endif %}
 {% endblock %}

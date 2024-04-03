@@ -12,14 +12,3 @@ class Checkpoint(models.Model):
     project = models.ForeignKey(Project,
                                 on_delete=models.CASCADE,
                                 related_name='checkpoints')
-    custom_id = models.IntegerField(null=True)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.custom_id = self.project.checkpoints_num
-            self.project.checkpoints_num += 1
-            self.project.save()
-        super().save(*args, **kwargs)
-
-    class Meta:
-        ordering = ['custom_id']

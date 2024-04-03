@@ -2,7 +2,7 @@
 {% block title %}Роль {{ participant.title }} проекта {{ participant.project.title }}{% endblock %}
 {% block content %}
     <h1>Вы действительно хотите {{ message }} {{ participant.title }} в проекте {{ participant.project.title }}?</h1>
-    <form action="{% url 'projects:clear_participant' participant.project.pk participant.custom_id %}" method="post">
+    <form action="{% url 'participants:clear_participant' participant.pk %}" method="post">
         {% csrf_token %}
         <div class="central-element">
             <button type="submit">Да</button>

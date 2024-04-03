@@ -1,17 +1,14 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
-from participants.models import Participant
-from projects.models import Project
+from applications.models import Application
 
 
-class UserIsCreatorRequiredMixin:
+class UserIsCreatorOfApplicationProjectMixin:
     def dispatch(self, request, *args, **kwargs):
         pk = int(kwargs['pk'])
-        project = get_object_or_404(Project, pk=pk)
+        application = get_object_or_404(Application, pk=pk)
+        project = application.vacancy.project
         if project.creator == request.user:
             return super().dispatch(request, *args, **kwargs)
         raise PermissionDenied
-
-
-

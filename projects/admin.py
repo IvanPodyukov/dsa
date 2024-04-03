@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from checkpoints.models import Checkpoint
-from projects.models import Project, Participant
+from participants.models import Participant
+from projects.models import Project
 
 
 class CheckpointInline(admin.StackedInline):

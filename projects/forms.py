@@ -6,7 +6,8 @@ from django.forms.utils import ErrorDict
 
 from account.models import Interest
 from checkpoints.models import Checkpoint
-from projects.models import Project, Participant
+from participants.models import Participant
+from projects.models import Project
 
 
 class CheckpointCreateForm(models.ModelForm):

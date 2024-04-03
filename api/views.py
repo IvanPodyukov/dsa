@@ -26,8 +26,8 @@ from api.utils import get_and_authenticate_user
 from applications.models import Application
 from checkpoints.models import Checkpoint
 from notifications.models import Notification
-from projects.filters import ProjectFilter
-from projects.models import Project, Participant
+from participants.models import Participant
+from projects.models import Project
 
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin
 
@@ -277,7 +277,7 @@ class NotificationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet)
         return NotificationSerializer
 
     def get_serializer(self, *args, **kwargs):
-        if self.action in ['read', 'unread', 'read_all', 'unread_all']:
+        if self.action in ['read', 'unread', 'read_all', 'unread_all', 'clear', 'destroy']:
             return None
         return super().get_serializer(*args, **kwargs)
 
@@ -315,4 +315,11 @@ class NotificationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet)
         notification = self.get_object()
         notification.unread = True
         notification.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(responses={204: ""})
+    @action(detail=False, methods=['post'])
+    def clear(self, request):
+        notifications = request.user.notifications.all()
+        notifications.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

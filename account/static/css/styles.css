@@ -252,6 +252,10 @@ h1 {
     align-items: center;
 }
 
+.update-form label, .update-form input {
+    font-size: 20px;
+}
+
 .button-container {
     display: flex;
     justify-content: space-between;
@@ -313,4 +317,120 @@ table {
 
 .read {
     background-color: #6fd57f;
+}
+
+.sidebar {
+    transition: 0.5s;
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 50px;
+    left: 0;
+    background: #007bff;
+    overflow-x: hidden;
+    padding-top: 60px;
+}
+
+.sidenav a {
+    margin: 25px 10px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #fff;
+    display: block;
+    transition: 0.3s;
+    align-items: center;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    color: white;
+    cursor: pointer;
+    height: 50px;
+    line-height: 55px;
+}
+
+#main {
+    transition: margin-left 0.5s;
+    padding: 20px;
+}
+
+@media screen and (max-height: 450px) {
+    .sidenav a {
+        font-size: 18px;
+    }
+}
+
+nav {
+    height: 50px;
+    background: #007bff;
+}
+
+.menu-button {
+    background: #fff;
+    height: 40px;
+    margin: 5px;
+    float: left;
+    line-height: 40px;
+    width: 100px;
+    text-align: center;
+    color: #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#menu-toggle {
+    display: none;
+}
+
+body:has(#menu-toggle:checked) #mySidenav {
+    width: 250px !important;
+}
+
+.sidenav form {
+    margin: 10px;
+}
+
+.project-container {
+    display: flex;
+}
+
+.filter-column {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.project-column {
+    flex: 3;
+}
+
+
+.filter-form {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.filter-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-form select, .filter-form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }

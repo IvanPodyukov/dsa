@@ -27,29 +27,6 @@ class Project(models.Model):
     completion_deadline = models.DateField()
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=VACANT)
     tags = models.ManyToManyField(Interest, related_name='projects')
-    checkpoints_num = models.IntegerField(default=0)
-    participants_num = models.IntegerField(default=0)
 
     def get_absolute_url(self):
-        return reverse('projects:project_info', args=(self.id, ))
-
-
-class Participant(models.Model):
-    title = models.CharField(max_length=30)
-    description = models.CharField(max_length=100)
-    project = models.ForeignKey(Project,
-                                on_delete=models.CASCADE,
-                                related_name='participants')
-    participant = models.ForeignKey(User,
-                                    on_delete=models.CASCADE,
-                                    related_name='participations',
-                                    null=True)
-    custom_id = models.IntegerField(null=True)
-    applications_num = models.IntegerField(default=1)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.custom_id = self.project.participants_num
-            self.project.participants_num += 1
-            self.project.save()
-        super().save(*args, **kwargs)
+        return reverse('projects:project_info', args=(self.id,))
