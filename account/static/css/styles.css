@@ -54,6 +54,7 @@ a {
     border-radius: 10px;
     border: 1px solid #041336;
     transition: background-color 0.3s ease;
+    display: inline-block;
 }
 
 .block {
@@ -346,7 +347,12 @@ table {
 }
 
 .sidenav a:hover {
-    color: #f1f1f1;
+    color: #007bff;
+}
+
+.sidenav button:hover {
+    background-color: #007bff;
+    color: #fff;
 }
 
 .sidenav .closebtn {
