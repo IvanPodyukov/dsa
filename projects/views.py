@@ -120,8 +120,8 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
             tags__interested_users=self.request.user).annotate(
             vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
             common_tags=Count('tags', distinct=True),
-            checkpoints_num=Count('checkpoints'),
-            participants_num=Count('participants'),
+            checkpoints_num=Count('checkpoints', distinct=True),
+            participants_num=Count('participants', distinct=True),
         ).distinct().filter(vacancies_num__gt=0)
         return projects
 
