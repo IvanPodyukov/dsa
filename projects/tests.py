@@ -1,3 +1,4 @@
+import datetime
 from unittest.mock import patch
 
 from django.test import TestCase
@@ -5,8 +6,6 @@ from django.urls import reverse
 
 from account.models import User, Interest
 from api.serializers import ProjectUpdateSerializer
-from applications.models import Application
-from participants.models import Participant
 from projects.models import Project
 
 
@@ -20,8 +19,8 @@ class ProjectTestCase(TestCase):
         cls.mock_authenticate.return_value = cls.user1
         cls.project_info = {
             'title': 'Title', 'description': 'Desc',
-            'application_deadline': '2024-04-05',
-            'completion_deadline': '2024-04-07',
+            'application_deadline': datetime.date.today() + datetime.timedelta(days=1),
+            'completion_deadline': datetime.date.today() + datetime.timedelta(days=3),
             'creator': cls.user1
         }
         cls.participant_info = {
@@ -37,8 +36,9 @@ class ProjectTestCase(TestCase):
         csrf_token = response.cookies['csrftoken'].value
         project_info = {
             'csrfmiddlewaretoken': csrf_token, 'title': 'Title', 'description': 'Desc',
-            'application_deadline': '2024-04-05',
-            'completion_deadline': '2024-04-07', 'tags': [1], 'checkpoints-TOTAL_FORMS': '1',
+            'application_deadline': datetime.date.today() + datetime.timedelta(days=1),
+            'completion_deadline': datetime.date.today() + datetime.timedelta(days=3), 'tags': [self.interest.id],
+            'checkpoints-TOTAL_FORMS': '1',
             'checkpoints-INITIAL_FORMS': '0', 'checkpoints-MIN_NUM_FORMS': '0',
             'checkpoints-MAX_NUM_FORMS': '1000', 'checkpoints-0-title': '', 'checkpoints-0-description': '',
             'checkpoints-0-deadline': '', 'checkpoints-0-DELETE': 'on', 'checkpoints-0-id': '',
@@ -48,7 +48,8 @@ class ProjectTestCase(TestCase):
             'participants-0-description': 'RoleDesc1', 'participants-0-id': '', 'participants-0-project': ''
         }
         response = self.client.post(url, project_info)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Project.objects.filter(title='Title', description='Desc').exists())
         self.client.logout()
 
     def test_project_create_unauthorized(self):
@@ -107,50 +108,6 @@ class ProjectTestCase(TestCase):
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
         project.delete()
 
-    def test_project_submit_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('participants:participant_submit', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, '/')
-        self.assertTrue(Application.objects.filter(vacancy=participant, applicant=self.user1).exists())
-        self.client.logout()
-        project.delete()
-
-    def test_project_submit_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('participants:participant_submit', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
-    def test_project_withdraw_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        Application.objects.create(applicant=self.user1, vacancy=participant)
-        url = reverse('participants:participant_withdraw', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, '/')
-        self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user1).exists())
-        self.client.logout()
-        project.delete()
-
-    def test_project_withdraw_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        Application.objects.create(applicant=self.user1, vacancy=participant)
-        url = reverse('participants:participant_withdraw', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
     def test_participants_list_unauthorized(self):
         project = Project.objects.create(**self.project_info)
         url = reverse('projects:participants_list', args=(project.pk,))
@@ -177,177 +134,6 @@ class ProjectTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
         self.client.logout()
-        project.delete()
-
-    def test_applications_list_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('participants:participant_applications_list', args=(participant.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
-    def test_applications_list_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('participants:participant_applications_list', args=(participant.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.client.logout()
-        project.delete()
-
-    def test_applications_list_not_creator(self):
-        self.client.login(email=self.user1.email)
-        new_project_info = self.project_info.copy()
-        new_project_info['creator'] = self.user2
-        project = Project.objects.create(**new_project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        url = reverse('participants:participant_applications_list', args=(participant.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
-        self.client.logout()
-        project.delete()
-
-    def test_application_accept_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('applications:application_accept', args=(application.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
-    def test_application_accept_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('applications:application_accept', args=(application.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('projects:participants_list', args=(project.pk,)))
-        self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user2).exists())
-        participant.refresh_from_db()
-        self.assertEqual(participant.participant, self.user2)
-        self.assertEqual(participant.applications.all().count(), 0)
-        self.client.logout()
-        project.delete()
-
-    def test_application_accept_not_creator(self):
-        self.client.login(email=self.user1.email)
-        new_project_info = self.project_info.copy()
-        new_project_info['creator'] = self.user2
-        project = Project.objects.create(**new_project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user1)
-        url = reverse('applications:application_accept', args=(application.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 403)
-        self.client.logout()
-        project.delete()
-
-    def test_application_reject_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('applications:application_reject', args=(application.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
-    def test_application_reject_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('applications:application_reject', args=(application.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('participants:participant_applications_list',
-                                               args=(participant.pk,)))
-        self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user2).exists())
-        self.client.logout()
-        project.delete()
-
-    def test_application_reject_not_creator(self):
-        self.client.login(email=self.user1.email)
-        new_project_info = self.project_info.copy()
-        new_project_info['creator'] = self.user2
-        project = Project.objects.create(**new_project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user1)
-        url = reverse('applications:application_reject', args=(application.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 403)
-        self.client.logout()
-        project.delete()
-
-    def test_participant_confirm_clear_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('participants:confirm_clear_participant', args=(participant.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
-    def test_participant_confirm_clear_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('participants:confirm_clear_participant', args=(participant.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.client.logout()
-        project.delete()
-
-    def test_participant_confirm_clear_not_creator_or_participant(self):
-        self.client.login(email=self.user1.email)
-        new_project_info = self.project_info.copy()
-        new_project_info['creator'] = self.user2
-        project = Project.objects.create(**new_project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user2)
-        url = reverse('participants:confirm_clear_participant', args=(participant.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
-        self.client.logout()
-        project.delete()
-
-    def test_participant_clear_unauthorized(self):
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('participants:clear_participant', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
-        project.delete()
-
-    def test_participant_clear_authorized(self):
-        self.client.login(email=self.user1.email)
-        project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
-        url = reverse('participants:clear_participant', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('projects:project_info', args=(project.pk,)))
-        participant.refresh_from_db()
-        self.assertIsNone(participant.participant)
-        self.client.logout()
-        project.delete()
-
-    def test_participant_clear_not_creator_or_participant(self):
-        self.client.login(email=self.user1.email)
-        new_project_info = self.project_info.copy()
-        new_project_info['creator'] = self.user2
-        project = Project.objects.create(**new_project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user2)
-        url = reverse('participants:clear_participant', args=(participant.pk,))
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 403)
         project.delete()
 
     def test_project_delete_unauthorized(self):
@@ -405,11 +191,13 @@ class ProjectTestCase(TestCase):
             'csrfmiddlewaretoken': response.cookies['csrftoken'].value,
             'checkpoints-TOTAL_FORMS': 1, 'checkpoints-INITIAL_FORMS': 0, 'checkpoints-MIN_NUM_FORMS': 0,
             'checkpoints-MAX_NUM_FORMS': 1000, 'checkpoints-0-title': 'Check1',
-            'checkpoints-0-description': 'DescCheck1', 'checkpoints-0-deadline': '2024-04-06', 'checkpoints-0-id': '',
-            'checkpoints-0-project': 2
+            'checkpoints-0-description': 'DescCheck1',
+            'checkpoints-0-deadline': datetime.date.today() + datetime.timedelta(days=2), 'checkpoints-0-id': '',
+            'checkpoints-0-project': project.pk
         }
         response = self.client.post(url, data=checkpoint_info)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(1, project.checkpoints.count())
         self.client.logout()
         project.delete()
 

@@ -134,7 +134,7 @@ class CheckpointUpdateView(LoginRequiredMixin, UserIsCreatorRequiredMixin, Updat
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['checkpoints'] = CheckpointFormSet(self.request.POST)
+            context['checkpoints'] = CheckpointFormSet(self.request.POST, instance=self.object)
         else:
             context['checkpoints'] = CheckpointFormSet(instance=self.object)
         return context
