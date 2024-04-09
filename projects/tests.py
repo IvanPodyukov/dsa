@@ -38,11 +38,9 @@ class ProjectTestCase(TestCase):
             'csrfmiddlewaretoken': csrf_token, 'title': 'Title', 'description': 'Desc',
             'application_deadline': datetime.date.today() + datetime.timedelta(days=1),
             'completion_deadline': datetime.date.today() + datetime.timedelta(days=3), 'tags': [self.interest.id],
-            'checkpoints-TOTAL_FORMS': '1',
+            'checkpoints-TOTAL_FORMS': '0',
             'checkpoints-INITIAL_FORMS': '0', 'checkpoints-MIN_NUM_FORMS': '0',
-            'checkpoints-MAX_NUM_FORMS': '1000', 'checkpoints-0-title': '', 'checkpoints-0-description': '',
-            'checkpoints-0-deadline': '', 'checkpoints-0-DELETE': 'on', 'checkpoints-0-id': '',
-            'checkpoints-0-project': '', 'participants-TOTAL_FORMS': '1', 'participants-INITIAL_FORMS': '0',
+            'checkpoints-MAX_NUM_FORMS': '1000', 'participants-TOTAL_FORMS': '1', 'participants-INITIAL_FORMS': '0',
             'participants-MIN_NUM_FORMS': '0', 'participants-MAX_NUM_FORMS': '1000',
             'participants-0-title': 'Role1',
             'participants-0-description': 'RoleDesc1', 'participants-0-id': '', 'participants-0-project': ''

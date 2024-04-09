@@ -6,8 +6,7 @@ from django.views.generic import ListView
 
 from applications.mixins import UserIsCreatorOfApplicationProjectMixin
 from applications.models import Application
-from notifications.models import Notification
-from projects.mixins import UserIsCreatorRequiredMixin
+from notifications.utils import create_notifications_application_accept, create_notification_application_reject
 
 
 class ApplicationListView(LoginRequiredMixin, ListView):
@@ -23,15 +22,9 @@ class ApplicationAcceptView(LoginRequiredMixin, UserIsCreatorOfApplicationProjec
         application = get_object_or_404(Application, pk=pk)
         participant = application.vacancy
         participant.participant = application.applicant
+        create_notifications_application_accept(application)
+        participant.applications.all().delete()
         participant.save()
-        text = f'Ваша заявка на роль {participant.title} в проекте {participant.project.title} одобрена'
-        Notification.objects.create(user=application.applicant, text=text)
-        application.delete()
-        remaining_applications = participant.applications.all()
-        text = f'Ваша заявка на роль {participant.title} в проекте {participant.project.title} отклонена'
-        for application in remaining_applications:
-            Notification.objects.create(user=application.applicant, text=text)
-            application.delete()
         return redirect(reverse('projects:participants_list', args=(participant.project.pk,)))
 
 
@@ -39,7 +32,6 @@ class ApplicationRejectView(LoginRequiredMixin, UserIsCreatorOfApplicationProjec
     def post(self, request, pk):
         application = get_object_or_404(Application, pk=pk)
         participant = application.vacancy
-        text = f'Ваша заявка на роль {participant.title} в проекте {participant.project.title} отклонена'
-        Notification.objects.create(user=application.applicant, text=text)
+        create_notification_application_reject(application)
         application.delete()
         return redirect(reverse('participants:participant_applications_list', args=(participant.pk,)))

@@ -425,6 +425,7 @@ body:has(#menu-toggle:checked) #mySidenav {
     margin-bottom: 20px;
     padding: 10px;
     background-color: #f9f9f9;
+    border: 2px solid #007bff;
     border-radius: 5px;
 }
 
@@ -439,4 +440,22 @@ body:has(#menu-toggle:checked) #mySidenav {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
+}
+
+.info-project label, .info-project input[type="text"] {
+    font-size: 20px;
+}
+
+.checkpoint-form, .participant-form {
+    text-align: center;
+}
+
+.edit-checkpoint .delete-checkpoint-button {
+    margin-left: 10px;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid #007bff;
+    margin: 20px 0;
 }

@@ -17,7 +17,7 @@
                     {% for checkpoint in checkpoints %}
                         <div class="checkpoint-form">
                             {{ checkpoint.as_p }}
-                            <!-- <button id="remove-checkpoint-form" type="button">Удалить</button> -->
+                            <button class="delete-checkpoint-button" type="button">Удалить</button>
                         </div>
                     {% endfor %}
                 </div>
@@ -33,7 +33,7 @@
                     {% for participant in participants %}
                         <div class="participant-form">
                             {{ participant.as_p }}
-                            <!-- <button id="remove-participant-form" type="button">Удалить</button> -->
+                            <button class="delete-participant-button" type="button">Удалить</button>
                         </div>
                     {% endfor %}
                 </div>
@@ -62,51 +62,176 @@
         let checkpointTotalForms = document.querySelector("#id_checkpoints-TOTAL_FORMS")
         let participantTotalForms = document.querySelector("#id_participants-TOTAL_FORMS")
 
-        let checkpointNum = checkpointForm.length - 1
-        let participantNum = participantForm.length - 1
         addCheckpointButton.addEventListener('click', addCheckpointForm)
         addParticipantButton.addEventListener('click', addParticipantForm)
-        removeCheckpointButton.addEventListener('click', removeCheckpointForm)
-        removeParticipantButton.addEventListener('click', removeParticipantForm)
 
         function addCheckpointForm(e) {
             e.preventDefault()
+            let checkpointNum = document.querySelectorAll('.checkpoint-form').length
+            let newForm = document.createElement('div');
+            newForm.classList.add('checkpoint-form');
 
-            let newForm = checkpointForm[0].cloneNode(true)
-            let formRegex = RegExp(`checkpoints-(\\d){1}-`, 'g')
-            checkpointNum++
-            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `checkpoints-${checkpointNum}-`)
+            let inputTitle = document.createElement('input');
+            inputTitle.type = 'text';
+            inputTitle.name = `checkpoints-${checkpointNum}-title`;
+            inputTitle.id = `id_checkpoints-${checkpointNum}-title`;
+            inputTitle.maxLength = '30';
+            let labelTitle = document.createElement('label');
+            labelTitle.htmlFor = `id_checkpoints-${checkpointNum}-title`;
+            labelTitle.textContent = 'Название: ';
+            let paragraphTitle = document.createElement('p');
+            paragraphTitle.appendChild(labelTitle);
+            paragraphTitle.appendChild(inputTitle);
+
+            let inputDescription = document.createElement('input');
+            inputDescription.type = 'text';
+            inputDescription.name = `checkpoints-${checkpointNum}-description`;
+            inputDescription.id = `id_checkpoints-${checkpointNum}-description`;
+            inputDescription.maxLength = '100';
+            let labelDescription = document.createElement('label');
+            labelDescription.htmlFor = `id_checkpoints-${checkpointNum}-description`;
+            labelDescription.textContent = 'Описание: ';
+            let paragraphDescription = document.createElement('p');
+            paragraphDescription.appendChild(labelDescription);
+            paragraphDescription.appendChild(inputDescription);
+
+            let inputDeadline = document.createElement('input');
+            inputDeadline.type = 'date';
+            inputDeadline.name = `checkpoints-${checkpointNum}-deadline`;
+            inputDeadline.id = `id_checkpoints-${checkpointNum}-deadline`;
+            inputDeadline.placeholder = 'yyyy-mm-dd (DOB)';
+            inputDeadline.classList.add('form-control');
+            let labelDeadline = document.createElement('label');
+            labelDeadline.htmlFor = `id_checkpoints-${checkpointNum}-deadline`;
+            labelDeadline.textContent = 'Дедлайн контрольной точки: ';
+            let paragraphDeadline = document.createElement('p');
+            paragraphDeadline.appendChild(labelDeadline);
+            paragraphDeadline.appendChild(inputDeadline);
+
+            let inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = `checkpoints-${checkpointNum}-id`;
+            inputId.id = `id_checkpoints-${checkpointNum}-id`;
+
+            let inputProject = document.createElement('input');
+            inputProject.type = 'hidden';
+            inputProject.name = `checkpoints-${checkpointNum}-project`;
+            inputProject.id = `id_checkpoints-${checkpointNum}-project`;
+
+            let deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.textContent = 'Удалить';
+            deleteButton.classList.add('delete-checkpoint-button');
+            deleteButton.addEventListener('click', function () {
+                deleteCheckpointForm(newForm);
+            });
+
+            newForm.appendChild(paragraphTitle);
+            newForm.appendChild(paragraphDescription);
+            newForm.appendChild(paragraphDeadline);
+            newForm.appendChild(inputId);
+            newForm.appendChild(inputProject);
+            newForm.appendChild(deleteButton);
             checkpointContainer.appendChild(newForm)
-            //newForm.querySelector("#remove-checkpoint-form").addEventListener("click", removeCheckpointForm);
-            checkpointTotalForms.setAttribute('value', `${checkpointNum + 1}`)
+            checkpointTotalForms.setAttribute('value', `${++checkpointNum}`)
         }
 
         function addParticipantForm(e) {
             e.preventDefault()
+            let participantNum = document.querySelectorAll('.participant-form').length
+            let newForm = document.createElement('div');
+            newForm.classList.add('participant-form');
 
-            let newForm = participantForm[0].cloneNode(true)
-            let formRegex = RegExp(`participants-(\\d){1}-`, 'g')
-            participantNum++
-            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `participants-${participantNum}-`)
+            let inputTitle = document.createElement('input');
+            inputTitle.type = 'text';
+            inputTitle.name = `participants-${participantNum}-title`;
+            inputTitle.id = `id_participants-${participantNum}-title`;
+            inputTitle.maxLength = '30';
+            let labelTitle = document.createElement('label');
+            labelTitle.htmlFor = `id_participants-${participantNum}-title`;
+            labelTitle.textContent = 'Название: ';
+            let paragraphTitle = document.createElement('p');
+            paragraphTitle.appendChild(labelTitle);
+            paragraphTitle.appendChild(inputTitle);
+
+            let inputDescription = document.createElement('input');
+            inputDescription.type = 'text';
+            inputDescription.name = `participants-${participantNum}-description`;
+            inputDescription.id = `id_participants-${participantNum}-description`;
+            inputDescription.maxLength = '100';
+            let labelDescription = document.createElement('label');
+            labelDescription.htmlFor = `id_participants-${participantNum}-description`;
+            labelDescription.textContent = 'Описание: ';
+            let paragraphDescription = document.createElement('p');
+            paragraphDescription.appendChild(labelDescription);
+            paragraphDescription.appendChild(inputDescription);
+
+            let inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = `participants-${participantNum}-id`;
+            inputId.id = `id_participants-${participantNum}-id`;
+
+            let inputProject = document.createElement('input');
+            inputProject.type = 'hidden';
+            inputProject.name = `participants-${participantNum}-project`;
+            inputProject.id = `id_participants-${participantNum}-project`;
+
+            let deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.textContent = 'Удалить';
+            deleteButton.classList.add('delete-participant-button');
+            deleteButton.addEventListener('click', function () {
+                deleteParticipantForm(newForm);
+            });
+
+            newForm.appendChild(paragraphTitle);
+            newForm.appendChild(paragraphDescription);
+            newForm.appendChild(inputId);
+            newForm.appendChild(inputProject);
+            newForm.appendChild(deleteButton);
             participantContainer.appendChild(newForm)
-            //newForm.querySelector("#remove-participant-form").addEventListener("click", removeParticipantForm);
-            participantTotalForms.setAttribute('value', `${participantNum + 1}`)
+            participantTotalForms.setAttribute('value', `${++participantNum}`)
         }
 
-        function removeCheckpointForm(e) {
-            e.preventDefault();
-            const formDiv = e.target.parentElement;
-            formDiv.remove();
-            checkpointNum--
-            checkpointTotalForms.setAttribute('value', `${checkpointNum + 1}`)
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('delete-checkpoint-button')) {
+                deleteCheckpointForm(e.target.parentNode);
+            }
+            if (e.target && e.target.classList.contains('delete-participant-button')) {
+                deleteParticipantForm(e.target.parentNode);
+            }
+        });
+
+        function deleteCheckpointForm(formElement) {
+            formElement.remove();
+
+            let forms = document.querySelectorAll('.checkpoint-form');
+            let checkpointNum = 0;
+            forms.forEach(function (form, index) {
+                let inputs = form.querySelectorAll('input, select');
+                inputs.forEach(function (input) {
+                    input.name = input.name.replace(/-\d+-/, `-${index}-`);
+                    input.id = input.id.replace(/-\d+-/, `-${index}-`);
+                });
+                checkpointNum++;
+            });
+            document.querySelector("#id_checkpoints-TOTAL_FORMS").setAttribute('value', `${checkpointNum}`);
         }
 
-        function removeParticipantForm(e) {
-            e.preventDefault();
-            const formDiv = e.target.parentElement;
-            formDiv.remove();
-            participantNum--
-            participantTotalForms.setAttribute('value', `${participantNum + 1}`)
+        function deleteParticipantForm(formElement) {
+            formElement.remove();
+
+            let forms = document.querySelectorAll('.participant-form');
+            let participantNum = 0;
+            forms.forEach(function (form, index) {
+                let inputs = form.querySelectorAll('input, select');
+                inputs.forEach(function (input) {
+                    input.name = input.name.replace(/-\d+-/, `-${index}-`);
+                    input.id = input.id.replace(/-\d+-/, `-${index}-`);
+                });
+                participantNum++;
+            });
+            document.querySelector("#id_participants-TOTAL_FORMS").setAttribute('value', `${participantNum}`);
         }
     </script>
 {% endblock %}

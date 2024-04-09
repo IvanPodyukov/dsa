@@ -16,8 +16,8 @@ class ProjectListView(LoginRequiredMixin, FilterView):
     paginate_by = 5
     queryset = Project.objects.all().annotate(
         vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
-        checkpoints_num=Count('checkpoints'),
-        participants_num=Count('participants'),
+        checkpoints_num=Count('checkpoints', distinct=True),
+        participants_num=Count('participants', distinct=True),
     )
     context_object_name = 'projects'
     template_name = 'projects/list.html'
@@ -62,14 +62,10 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
                 self.object.save()
                 self.object.tags.set(form.cleaned_data['tags'])
                 for checkpoint in checkpoints:
-                    if checkpoint.cleaned_data['DELETE']:
-                        continue
                     cpt = checkpoint.save(commit=False)
                     cpt.project = self.object
                     cpt.save()
                 for participant in participants:
-                    if participant.cleaned_data['DELETE']:
-                        continue
                     ppt = participant.save(commit=False)
                     ppt.project = self.object
                     ppt.save()
@@ -147,8 +143,6 @@ class CheckpointUpdateView(LoginRequiredMixin, UserIsCreatorRequiredMixin, Updat
             if checkpoints.is_valid():
                 self.object.checkpoints.all().delete()
                 for checkpoint in checkpoints:
-                    if checkpoint.cleaned_data['DELETE']:
-                        continue
                     cpt = checkpoint.save(commit=False)
                     cpt.project = self.object
                     cpt.save()

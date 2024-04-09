@@ -7,7 +7,6 @@ from rest_framework.generics import ListAPIView
 from rest_framework.mixins import DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.schemas import AutoSchema
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
@@ -26,10 +25,12 @@ from api.utils import get_and_authenticate_user
 from applications.models import Application
 from checkpoints.models import Checkpoint
 from notifications.models import Notification
+from notifications.utils import create_notifications_application_accept, create_notification_application_reject, \
+    create_notification_participant_clear
 from participants.models import Participant
 from projects.models import Project
 
-from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 
 
 class UserViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
@@ -224,9 +225,10 @@ class ParticipantViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
     @action(detail=True, methods=['post'])
     def clear(self, request, pk=None):
         participant = self.get_object()
-        if participant.participant == request.user or participant.project.creator == request.user:
-            participant.participant = None
-            participant.save()
+        if participant.project.creator == request.user and participant.participant:
+            create_notification_participant_clear(participant)
+        participant.participant = None
+        participant.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(responses={
@@ -264,9 +266,15 @@ class ApplicationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
         application = self.get_object()
         participant = application.vacancy
         participant.participant = application.applicant
+        create_notifications_application_accept(application)
         participant.applications.all().delete()
         participant.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        if instance.applicant != self.request.user:
+            create_notification_application_reject(instance)
+        super().perform_destroy(instance)
 
 
 class NotificationViewSet(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):

@@ -6,6 +6,7 @@
     <div class="info-project">
         <div class="detail-project">
             <h2>Информация о проекте</h2>
+            <hr>
             <p>Название: {{ project.title }}</p>
             <p class="inline-elements">Создатель: <a
                     href="{% url 'account:user-detail' project.creator.pk %}">Ссылка</a></p>
@@ -30,6 +31,7 @@
         </div>
         <div class="participants-project">
             <h2>Участники проекта</h2>
+            <hr>
             <table class="info-table">
                 <tr>
                     <th>Роль</th>
@@ -71,6 +73,7 @@
         <div class="checkpoints-project">
             {% if project.checkpoints.all %}
                 <h2>Контрольные точки проекта</h2>
+                <hr>
                 <table class="info-table">
                     <tr>
                         <th>Название</th>

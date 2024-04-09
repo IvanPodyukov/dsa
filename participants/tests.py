@@ -10,7 +10,7 @@ from participants.models import Participant
 from projects.models import Project
 
 
-class ProjectTestCase(TestCase):
+class ParticipantTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.interest = Interest.objects.create(title='Math')
@@ -160,12 +160,14 @@ class ProjectTestCase(TestCase):
     def test_participant_clear_authorized(self):
         self.client.login(email=self.user1.email)
         project = Project.objects.create(**self.project_info)
-        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user1)
+        participant = Participant.objects.create(**self.participant_info, project=project, participant=self.user2)
         url = reverse('participants:clear_participant', args=(participant.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('projects:project_info', args=(project.pk,)))
         participant.refresh_from_db()
+        self.assertTrue(self.user2.notifications.filter(
+            text=f'Вы были удалены с роли {participant.title} в проекте {project.title}').exists())
         self.assertIsNone(participant.participant)
         self.client.logout()
         project.delete()

@@ -7,6 +7,7 @@ from django.views.generic import ListView
 
 from applications.models import Application
 from notifications.models import Notification
+from notifications.utils import create_notification_participant_clear
 from participants.mixins import UserIsCreatorOrParticipantRequiredMixin, UserIsCreatorParticipantProjectRequiredMixin
 from participants.models import Participant
 
@@ -74,9 +75,8 @@ class ParticipantConfirmClearView(LoginRequiredMixin, UserIsCreatorOrParticipant
 class ParticipantClearView(LoginRequiredMixin, UserIsCreatorOrParticipantRequiredMixin, View):
     def post(self, request, pk):
         participant = get_object_or_404(Participant, pk=pk)
-        if participant.project.creator == request.user:
-            text = f'Вы были удалены с роли {participant.title} в проекте {participant.project.title}'
-            Notification.objects.create(user=participant.participant, text=text)
+        if participant.project.creator == request.user and participant.participant:
+            create_notification_participant_clear(participant)
         participant.participant = None
         participant.save()
         return redirect(reverse('projects:project_info', args=(participant.project.pk,)))

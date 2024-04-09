@@ -55,15 +55,21 @@ class ApplicationTestCase(TestCase):
         self.client.login(email=self.user1.email)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(**self.participant_info, project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user2)
-        url = reverse('applications:application_accept', args=(application.pk,))
+        application1 = Application.objects.create(vacancy=participant, applicant=self.user2)
+        application2 = Application.objects.create(vacancy=participant, applicant=self.user1)
+        url = reverse('applications:application_accept', args=(application1.pk,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('projects:participants_list', args=(project.pk,)))
         self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user2).exists())
+        self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user1).exists())
         participant.refresh_from_db()
         self.assertEqual(participant.participant, self.user2)
         self.assertEqual(participant.applications.all().count(), 0)
+        self.assertTrue(self.user2.notifications.filter(
+            text=f'Ваша заявка на роль {participant.title} в проекте {project.title} одобрена').exists())
+        self.assertTrue(self.user1.notifications.filter(
+            text=f'Ваша заявка на роль {participant.title} в проекте {project.title} отклонена').exists())
         self.client.logout()
         project.delete()
 
@@ -101,6 +107,8 @@ class ApplicationTestCase(TestCase):
         self.assertRedirects(response, reverse('participants:participant_applications_list',
                                                args=(participant.pk,)))
         self.assertFalse(Application.objects.filter(vacancy=participant, applicant=self.user2).exists())
+        self.assertTrue(self.user2.notifications.filter(
+            text=f'Ваша заявка на роль {participant.title} в проекте {project.title} отклонена').exists())
         self.client.logout()
         project.delete()
 

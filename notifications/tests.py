@@ -8,7 +8,7 @@ from account.models import User
 from notifications.models import Notification
 
 
-class ApplicationTestCase(TestCase):
+class NotificationTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.user1 = User.objects.create_user(email='vlad1@vk.ru')

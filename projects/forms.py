@@ -2,7 +2,6 @@ import datetime
 
 from django import forms
 from django.forms import models, inlineformset_factory, DateInput, BaseInlineFormSet, CheckboxSelectMultiple
-from django.forms.utils import ErrorDict
 
 from account.models import Interest
 from checkpoints.models import Checkpoint
@@ -46,9 +45,6 @@ class CheckpointInlineFormSet(BaseInlineFormSet):
             if not d:
                 form.add_error(None, forms.ValidationError('Должна быть заполнена информация в контрольной точке'))
                 continue
-            if d['DELETE']:
-                form._errors = ErrorDict()
-                continue
             if last_deadline and last_deadline >= d['deadline']:
                 form.add_error(None, forms.ValidationError(
                     'У контрольной точки не может дедлайн быть раньше дедлайна предыдущей'))
@@ -80,9 +76,6 @@ class ParticipantInlineFormSet(BaseInlineFormSet):
             if not d:
                 form.add_error(None, forms.ValidationError('Должна быть заполнена информация об участнике'))
                 continue
-            if d['DELETE']:
-                form._errors = ErrorDict()
-                continue
             count += 1
         if count == 0:
             raise forms.ValidationError('Не может быть 0 участников')
@@ -92,8 +85,8 @@ CheckpointFormSet = inlineformset_factory(
     Project,
     Checkpoint,
     form=CheckpointCreateForm,
-    extra=1,
-    can_delete=True,
+    extra=0,
+    can_delete=False,
     formset=CheckpointInlineFormSet
 )
 
@@ -101,8 +94,8 @@ ParticipantCreateFormSet = inlineformset_factory(
     Project,
     Participant,
     form=ParticipantCreateForm,
-    extra=1,
-    can_delete=True,
+    extra=0,
+    can_delete=False,
     formset=ParticipantInlineFormSet
 )
 

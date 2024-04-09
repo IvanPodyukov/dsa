@@ -758,6 +758,8 @@ class ParticipantApiTestCase(TestCase):
         response = self.client.post(f'/api/participants/{participant.id}/clear/', format='json')
         self.assertEqual(response.status_code, 204)
         participant.refresh_from_db()
+        self.assertTrue(self.user1.notifications.filter(
+            text=f'Вы были удалены с роли {participant.title} в проекте {project.title}').exists())
         self.assertIsNone(participant.participant)
         self.client.credentials()
         project.delete()
@@ -917,9 +919,11 @@ class ApplicationApiTestCase(TestCase):
         self.set_credentials(self.user1)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(title='Part1', description='PartDesc1', project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user1)
+        application = Application.objects.create(vacancy=participant, applicant=self.user2)
         response = self.client.delete(f'/api/applications/{application.id}/', format='json')
         self.assertEqual(response.status_code, 204)
+        self.assertTrue(self.user2.notifications.filter(
+            text=f'Ваша заявка на роль {participant.title} в проекте {project.title} отклонена').exists())
         self.assertEqual(0, participant.applications.count())
         self.client.credentials()
         project.delete()
@@ -948,11 +952,17 @@ class ApplicationApiTestCase(TestCase):
         self.set_credentials(self.user1)
         project = Project.objects.create(**self.project_info)
         participant = Participant.objects.create(title='Part1', description='PartDesc1', project=project)
-        application = Application.objects.create(vacancy=participant, applicant=self.user1)
+        application = Application.objects.create(vacancy=participant, applicant=self.user2)
+        Application.objects.create(vacancy=participant, applicant=self.user1)
         response = self.client.post(f'/api/applications/{application.id}/accept/', format='json')
         self.assertEqual(response.status_code, 204)
         participant.refresh_from_db()
-        self.assertEqual(self.user1, participant.participant)
+        self.assertEqual(self.user2, participant.participant)
+        self.assertTrue(self.user2.notifications.filter(
+            text=f'Ваша заявка на роль {participant.title} в проекте {project.title} одобрена').exists())
+        self.assertTrue(self.user1.notifications.filter(
+            text=f'Ваша заявка на роль {participant.title} в проекте {project.title} отклонена').exists())
+        self.assertEqual(0, participant.applications.count())
         self.client.credentials()
         project.delete()
 
