@@ -29,7 +29,7 @@ class EmailAuthBackend(BaseBackend):
                     return user
                 return None
             response = self.get_token(email, password)
-            if response.status_code == 400:
+            if response.status_code != 200:
                 return None
             token = response.json()['access_token']
             response = self.get_user_json(token)
@@ -40,7 +40,7 @@ class EmailAuthBackend(BaseBackend):
             return user
         except User.DoesNotExist:
             response = self.get_token(email, password)
-            if response.status_code == 400:
+            if response.status_code != 200:
                 return None
             token = response.json()['access_token']
             response = self.get_user_json(token)

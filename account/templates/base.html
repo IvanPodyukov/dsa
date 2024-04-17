@@ -18,6 +18,7 @@
         {% if request.user.is_authenticated %}
             <a href="{% url 'projects:projects_list' %}">Все проекты</a>
             <a href="{% url 'projects:recommended_projects_list' %}">Рекомендованные проекты</a>
+            <a href="{% url 'projects:leaderboard' %}">Топ проектов</a>
             <a href="{% url 'projects:my_projects_list' %}">Мои проекты</a>
             <a href="{% url 'participants:my_participations' %}">Участвую в проектах</a>
             <a href="{% url 'applications:applications_list' %}">Мои заявки</a>

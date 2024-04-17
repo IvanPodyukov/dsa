@@ -1,12 +1,13 @@
 import datetime
 
 from django import forms
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.forms import models, inlineformset_factory, DateInput, BaseInlineFormSet, CheckboxSelectMultiple
 
 from account.models import Interest
 from checkpoints.models import Checkpoint
 from participants.models import Participant
-from projects.models import Project
+from projects.models import Project, Rating
 
 
 class CheckpointCreateForm(models.ModelForm):
@@ -172,3 +173,10 @@ class ProjectUpdateForm(models.ModelForm):
                 raise forms.ValidationError('Дедлайн контрольной точки не может быть раньше дедлайна подачи заявок')
             if completion_deadline <= checkpoints[len(checkpoints) - 1].deadline:
                 raise forms.ValidationError('Дедлайн контрольной точки не может быть позже дедлайна выполнения проекта')
+
+
+class RatingForm(forms.Form):
+    rating = forms.CharField(
+        label='Рейтинг',
+        widget=forms.Select(choices=[('-', '-')] + [(i, i) for i in range(0, 6)])
+    )

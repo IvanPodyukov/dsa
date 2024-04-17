@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load project_tags %}
+{% load static %}
 {% load application_tags %}
 {% block title %}Проект {{ project.title }}{% endblock %}
 {% block content %}
@@ -21,6 +23,11 @@
                     <li>{{ tag }}</li>
                 {% endfor %}
             </ul>
+            {% with project.mean_rating as rating %}
+                <p>Средний рейтинг проекта: {% if rating is not None %}
+                    <img src="{% static 'images/star.png' %}" width="15" height="15"> {{ rating }} {% else %} Нет
+                    рейтинга {% endif %}</p>
+            {% endwith %}
             {% if project.creator == request.user %}
                 <p class="edit-button">
                     <a href="{% url "projects:project_update" project.pk %}">
@@ -45,7 +52,12 @@
                         {% applicationExists participant request.user as isApplication %}
                         <td>
                             {% if participant.participant is not NULL %}
-                                Есть
+                                {% isUserAllowToViewParticipants project user as condition %}
+                                {% if condition %}
+                                    <a href="{% url 'account:user-detail' participant.participant.pk %}">{{ participant.participant.full_name }}</a>
+                                {% else %}
+                                    Есть
+                                {% endif %}
                             {% elif not isApplication %}
                                 <form method="post"
                                       action="{% url 'participants:participant_submit' participant.pk %}"
@@ -100,6 +112,15 @@
             {% endif %}
         </div>
     </div>
-
-    <p><a href="{% url 'projects:projects_list' %}" class="back-button">Назад</a></p>
+    <div class="button-container">
+        <div class="rating">
+            <b>Насколько Вам интересен данный проект?</b>
+            <form method="post" action="{% url 'projects:rate_project' project.pk %}">
+                {% csrf_token %}
+                {{ rating_form.as_p }}
+                <button type="submit">Оценить</button>
+            </form>
+        </div>
+        <p><a href="{% url 'projects:projects_list' %}" class="back-button">Назад</a></p>
+    </div>
 {% endblock %}

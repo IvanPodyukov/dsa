@@ -1,6 +1,8 @@
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from django.db import models
+from django.db.models import Avg
 from django.urls import reverse
 
 from account.models import Interest, User
@@ -28,5 +30,21 @@ class Project(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=VACANT)
     tags = models.ManyToManyField(Interest, related_name='projects')
 
+    def mean_rating(self):
+        return self.ratings.all().aggregate(mean_rating=Avg('rating'))['mean_rating']
+
     def get_absolute_url(self):
         return reverse('projects:project_info', args=(self.id,))
+
+
+class Rating(models.Model):
+    project = models.ForeignKey(Project,
+                                on_delete=models.CASCADE,
+                                related_name='ratings')
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name='ratings')
+    rating = models.PositiveSmallIntegerField(validators=[
+        MaxValueValidator(5),
+        MinValueValidator(0)
+    ])

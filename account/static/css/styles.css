@@ -459,3 +459,65 @@ hr {
     border-top: 2px solid #007bff;
     margin: 20px 0;
 }
+
+.rating {
+    margin-bottom: 20px;
+}
+
+.rating b {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.rating form {
+    display: inline;
+}
+
+.rating label {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.rating select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    font-size: 20px;
+    color: #007bff;
+}
+
+.rating select:focus {
+    outline: none;
+}
+
+.rating select option {
+    padding: 12px;
+    font-size: 20px;
+}
+
+.first-place {
+    color: gold;
+    font-size: 60px;
+    font-weight: bold;
+}
+
+.second-place {
+    color: silver;
+    font-size: 60px;
+    font-weight: bold;
+}
+
+.third-place {
+    color: #cd7f32;
+    font-size: 60px;
+    font-weight: bold;
+}
+
+.other-place {
+    color: #007bff;
+    font-size: 60px;
+    font-weight: bold;
+}

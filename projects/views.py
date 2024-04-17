@@ -1,15 +1,17 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q
-from django.shortcuts import redirect
+from django.db.models import Count, Q, Avg
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
+from django.views import View
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
 
 from participants.models import Participant
 from projects.filters import ProjectFilter, ProjectRecommendedFilter
 from projects.mixins import UserIsCreatorRequiredMixin
-from projects.forms import ProjectCreateForm, CheckpointFormSet, ParticipantCreateFormSet, ProjectUpdateForm
-from projects.models import Project
+from projects.forms import ProjectCreateForm, CheckpointFormSet, ParticipantCreateFormSet, ProjectUpdateForm, RatingForm
+from projects.models import Project, Rating
 
 
 class ProjectListView(LoginRequiredMixin, FilterView):
@@ -30,6 +32,17 @@ class MyProjectListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return self.request.user.created_projects.all()
+
+
+class ProjectLeaderboardView(LoginRequiredMixin, ListView):
+    context_object_name = 'projects'
+    template_name = 'projects/leaderboard.html'
+    paginate_by = 5
+
+    def get_queryset(self):
+        return Project.objects.filter(ratings__isnull=False).distinct().annotate(
+            mean_rating=Avg('ratings__rating')).order_by(
+            '-mean_rating')
 
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
@@ -80,6 +93,15 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
     model = Project
     context_object_name = 'project'
     template_name = 'projects/info.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.object.ratings.filter(user=self.request.user).exists():
+            rating = '-'
+        else:
+            rating = str(self.object.ratings.all().get(user=self.request.user).rating)
+        context['rating_form'] = RatingForm({'rating': rating})
+        return context
 
 
 class ProjectUpdateView(LoginRequiredMixin, UserIsCreatorRequiredMixin, UpdateView):
@@ -159,3 +181,23 @@ class ProjectDeleteView(LoginRequiredMixin, UserIsCreatorRequiredMixin, DeleteVi
 
     def get_success_url(self):
         return reverse('projects:my_projects_list')
+
+
+class ProjectRateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        rating = request.POST.get('rating')
+        if rating == '-':
+            Rating.objects.filter(project=project, user=request.user).delete()
+            messages.success(request, 'Рейтинг был удалён')
+        else:
+            rating = int(rating)
+            project_rating, created = Rating.objects.get_or_create(defaults={'rating': rating}, project=project,
+                                                                   user=request.user)
+            if created:
+                messages.success(request, 'Рейтинг был добавлен')
+            else:
+                messages.success(request, 'Рейтинг был изменён')
+                project_rating.rating = rating
+                project_rating.save()
+        return redirect(reverse('projects:project_info', args=(pk,)))
