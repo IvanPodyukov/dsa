@@ -12,6 +12,7 @@ from projects.filters import ProjectFilter, ProjectRecommendedFilter
 from projects.mixins import UserIsCreatorRequiredMixin
 from projects.forms import ProjectCreateForm, CheckpointFormSet, ParticipantCreateFormSet, ProjectUpdateForm, RatingForm
 from projects.models import Project, Rating
+from projects.recommendation import recommend_projects
 
 
 class ProjectListView(LoginRequiredMixin, FilterView):
@@ -32,6 +33,21 @@ class MyProjectListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return self.request.user.created_projects.all()
+
+
+class RatedProjectsView(LoginRequiredMixin, ListView):
+    context_object_name = 'projects_and_forms'
+    template_name = 'projects/rated_projects.html'
+    paginate_by = 5
+
+    def get_queryset(self):
+        projects = Project.objects.filter(ratings__user=self.request.user)
+        rating_forms = []
+        for project in projects:
+            form = RatingForm({'rating': project.ratings.get(user=self.request.user).rating})
+            form.fields['rating'].label = ''
+            rating_forms.append(form)
+        return list(zip(projects, rating_forms))
 
 
 class ProjectLeaderboardView(LoginRequiredMixin, ListView):
@@ -134,8 +150,7 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
     paginate_by = 5
 
     def get_queryset(self):
-        projects = Project.objects.exclude(status=Project.COMPLETED).filter(
-            tags__interested_users=self.request.user).annotate(
+        projects = recommend_projects(self.request.user.pk).exclude(status=Project.COMPLETED).annotate(
             vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
             common_tags=Count('tags', distinct=True),
             checkpoints_num=Count('checkpoints', distinct=True),
@@ -200,4 +215,7 @@ class ProjectRateView(LoginRequiredMixin, View):
                 messages.success(request, 'Рейтинг был изменён')
                 project_rating.rating = rating
                 project_rating.save()
-        return redirect(reverse('projects:project_info', args=(pk,)))
+        path = request.META.get('HTTP_REFERER')
+        if path is None:
+            return redirect(reverse('main'))
+        return redirect(path)

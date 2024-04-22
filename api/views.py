@@ -20,7 +20,8 @@ from api.permissions import ProjectPermission, ApplicationPermission, Participan
 from api.serializers import UserInfoSerializer, InterestSerializer, ProjectReadOnlySerializer, \
     CheckpointReadOnlySerializer, ParticipantSerializer, ProjectCreateSerializer, \
     ApplicationReadOnlySerializer, UserLoginSerializer, AuthUserSerializer, ProjectUpdateSerializer, \
-    CheckpointUpdateSerializer, ProjectRecommendedSerializer, UserUpdateSerializer, NotificationSerializer
+    CheckpointUpdateSerializer, ProjectRecommendedSerializer, UserUpdateSerializer, NotificationSerializer, \
+    RatingWriteOnlySerializer, RatingReadOnlySerializer
 from api.utils import get_and_authenticate_user
 from applications.models import Application
 from checkpoints.models import Checkpoint
@@ -28,9 +29,11 @@ from notifications.models import Notification
 from notifications.utils import create_notifications_application_accept, create_notification_application_reject, \
     create_notification_participant_clear
 from participants.models import Participant
-from projects.models import Project
+from projects.models import Project, Rating
 
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+
+from projects.recommendation import recommend_projects
 
 
 class UserViewSet(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
@@ -100,6 +103,14 @@ class MineProjectList(ListAPIView):
         return Project.objects.filter(creator=self.request.user)
 
 
+class RatedProjectList(ListAPIView):
+    serializer_class = ProjectReadOnlySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Project.objects.filter(ratings__user=self.request.user)
+
+
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
     filter_backends = [ProjectFilterBackend]
@@ -117,6 +128,8 @@ class ProjectViewSet(ModelViewSet):
             return CheckpointReadOnlySerializer
         if self.action == 'participants':
             return ParticipantSerializer
+        if self.action == 'rate':
+            return RatingWriteOnlySerializer
         return ProjectReadOnlySerializer
 
     def perform_create(self, serializer):
@@ -134,8 +147,8 @@ class ProjectViewSet(ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def recommended(self, request):
-        recommended_projects = self.filter_queryset(self.get_queryset()).exclude(status=Project.COMPLETED).filter(
-            tags__interested_users=request.user).annotate(
+        recommended_projects = self.filter_queryset(recommend_projects(request.user.pk)).exclude(
+            status=Project.COMPLETED).annotate(
             number_of_vacancies=Count('participants', filter=Q(participants__participant=None), distinct=True),
             common_tags=Count('tags', distinct=True)
         ).distinct().filter(number_of_vacancies__gt=0)
@@ -165,6 +178,26 @@ class ProjectViewSet(ModelViewSet):
         project = self.get_object()
         participants = project.participants.all()
         serializer = self.get_serializer(participants, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(responses={
+        200: RatingReadOnlySerializer()
+    })
+    @action(detail=True, methods=['post'])
+    def rate(self, request, pk=None):
+        project = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rating = serializer.validated_data['rating']
+        if rating is None:
+            Rating.objects.filter(project=project, user=request.user).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        rating_obj, created = Rating.objects.get_or_create(defaults={'rating': rating}, user=request.user,
+                                                           project=project)
+        if not created:
+            rating_obj.rating = rating
+            rating_obj.save()
+        serializer = RatingReadOnlySerializer(rating_obj)
         return Response(serializer.data)
 
 

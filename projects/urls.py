@@ -9,6 +9,7 @@ urlpatterns = [
     path('recommended/', views.RecommendedProjectListView.as_view(), name='recommended_projects_list'),
     path('mine/', views.MyProjectListView.as_view(), name='my_projects_list'),
     path('leaderboard/', views.ProjectLeaderboardView.as_view(), name='leaderboard'),
+    path('rated/', views.RatedProjectsView.as_view(), name='rated_projects'),
     path('<pk>/', views.ProjectDetailView.as_view(), name='project_info'),
     path('<pk>/participants/', views.ParticipantsListView.as_view(), name='participants_list'),
     path('<pk>/update/', views.ProjectUpdateView.as_view(), name='project_update'),

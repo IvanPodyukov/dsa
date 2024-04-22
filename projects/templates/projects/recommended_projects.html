@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% load project_tags %}
 {% block title %}Рекомендованные проекты{% endblock %}
 {% block content %}
@@ -27,6 +28,7 @@
                     <th>Количество вакансий</th>
                     <th>Число общих интересов</th>
                     <th>Пересечение интересов с пользователем</th>
+                    <th>Прогнозируемый рейтинг</th>
                 </tr>
                 {% for project in projects %}
                     <tr>
@@ -48,6 +50,7 @@
                                 {% endfor %}
                             </ul>
                         </td>
+                        <td> <img src="{% static 'images/star.png' %}" width="15" height="15"> {{ project.expected_rating|floatformat:2 }}</td>
                     </tr>
                 {% endfor %}
             </table>

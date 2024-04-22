@@ -70,7 +70,7 @@ nav form {
     display: inline;
 }
 
-form button {
+form button, .rating button {
     background-color: #007bff;
     color: #ffffff;
     border: 1px solid #041336;
@@ -320,16 +320,11 @@ table {
     background-color: #6fd57f;
 }
 
-.sidebar {
-    transition: 0.5s;
-}
-
 .sidenav {
     height: 100%;
     width: 0;
     position: fixed;
     z-index: 1;
-    top: 50px;
     left: 0;
     background: #007bff;
     overflow-x: hidden;
@@ -344,6 +339,7 @@ table {
     display: block;
     transition: 0.3s;
     align-items: center;
+    word-wrap: break-word;
 }
 
 .sidenav a:hover {
@@ -400,11 +396,15 @@ nav {
 }
 
 body:has(#menu-toggle:checked) #mySidenav {
-    width: 250px !important;
+    width: 300px !important;
 }
 
 .sidenav form {
     margin: 10px;
+}
+
+.sidenav form button {
+    margin-bottom: 10px;
 }
 
 .project-container {
@@ -487,6 +487,7 @@ hr {
     border-radius: 5px;
     font-size: 20px;
     color: #007bff;
+    text-align: center;
 }
 
 .rating select:focus {

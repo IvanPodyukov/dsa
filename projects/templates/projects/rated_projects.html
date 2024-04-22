@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Оценённые проекты{% endblock %}
+{% block content %}
+    <h1>Оценённые проекты</h1>
+    <table class="info-table">
+        <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Статус</th>
+            <th>Дедлайн подачи заявки</th>
+            <th>Дедлайн завершения проекта</th>
+            <th>Дата создания проекта</th>
+            <th>Средний рейтинг</th>
+            <th>Поставленный рейтинг</th>
+            <th></th>
+        </tr>
+        {% for project, form in projects_and_forms %}
+            <tr>
+                <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
+                <td>{{ project.description }}</td>
+                <td>{{ project.get_status_display }}</td>
+                <td>{{ project.application_deadline|date:"d.m.Y" }}</td>
+                <td>{{ project.completion_deadline|date:"d.m.Y" }}</td>
+                <td>{{ project.created|date:"d.m.Y" }}</td>
+                <td><img src="{% static 'images/star.png' %}" width="15"
+                         height="15"> {{ project.mean_rating|floatformat:2 }}</td>
+                <form method="post" action="{% url 'projects:rate_project' project.pk %}">
+                    {% csrf_token %}
+                    <td class="rating">
+                        {{ form.as_p }}
+                    </td>
+                    <td class="rating">
+                        <button type="submit">Оценить</button>
+                    </td>
+                </form>
+            </tr>
+        {% endfor %}
+    </table>
+    {% include 'common/pagination.html' %}
+{% endblock %}

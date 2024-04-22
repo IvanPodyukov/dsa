@@ -13,7 +13,7 @@ class UserPermission(BasePermission):
 
 class ProjectPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if view.action in ['retrieve', 'checkpoints', 'participants']:
+        if view.action in ['retrieve', 'checkpoints', 'participants', 'rate']:
             return request.user.is_authenticated
         return request.user.is_authenticated and obj.creator == request.user
 

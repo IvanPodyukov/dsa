@@ -10,4 +10,4 @@ class InterestAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    pass
+    fields = ['email', 'full_name', 'description']

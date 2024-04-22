@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from checkpoints.models import Checkpoint
 from participants.models import Participant
-from projects.models import Project
+from projects.models import Project, Rating
 
 
 class CheckpointInline(admin.StackedInline):
@@ -17,3 +17,8 @@ class ParticipantInline(admin.StackedInline):
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     inlines = [CheckpointInline, ParticipantInline]
+
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    pass

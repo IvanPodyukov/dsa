@@ -10,7 +10,7 @@ from applications.models import Application
 from checkpoints.models import Checkpoint
 from notifications.models import Notification
 from participants.models import Participant
-from projects.models import Project
+from projects.models import Project, Rating
 
 
 class InterestSerializer(serializers.ModelSerializer):
@@ -94,11 +94,13 @@ class ProjectReadOnlySerializer(serializers.ModelSerializer):
     vacancies_num = SerializerMethodField()
     checkpoints_num = SerializerMethodField()
     participants_num = SerializerMethodField()
+    mean_rating = SerializerMethodField()
+    my_rating = SerializerMethodField()
 
     class Meta:
         model = Project
         fields = ['id', 'title', 'creator', 'created', 'description', 'application_deadline', 'completion_deadline',
-                  'status', 'tags', 'checkpoints_num', 'participants_num', 'vacancies_num']
+                  'status', 'tags', 'checkpoints_num', 'participants_num', 'vacancies_num', 'mean_rating', 'my_rating']
 
     def get_vacancies_num(self, obj):
         return obj.participants.filter(participant=None).count()
@@ -109,6 +111,15 @@ class ProjectReadOnlySerializer(serializers.ModelSerializer):
     def get_participants_num(self, obj):
         return obj.participants.count()
 
+    def get_mean_rating(self, obj):
+        return obj.mean_rating()
+
+    def get_my_rating(self, obj):
+        rating = obj.ratings.filter(user=self.context['request'].user)
+        if rating.exists():
+            return rating.first().rating
+        return None
+
 
 class ProjectRecommendedSerializer(serializers.ModelSerializer):
     tags = InterestSerializer(many=True, read_only=True)
@@ -116,11 +127,14 @@ class ProjectRecommendedSerializer(serializers.ModelSerializer):
     vacancies_num = SerializerMethodField()
     checkpoints_num = SerializerMethodField()
     participants_num = SerializerMethodField()
+    mean_rating = SerializerMethodField()
+    expected_rating = SerializerMethodField()
 
     class Meta:
         model = Project
         fields = ['id', 'title', 'created', 'description', 'application_deadline', 'completion_deadline',
-                  'status', 'tags', 'common_tags', 'checkpoints_num', 'participants_num', 'vacancies_num']
+                  'status', 'tags', 'common_tags', 'checkpoints_num', 'participants_num', 'vacancies_num',
+                  'mean_rating', 'expected_rating']
 
     def get_common_tags(self, obj):
         return obj.common_tags
@@ -133,6 +147,12 @@ class ProjectRecommendedSerializer(serializers.ModelSerializer):
 
     def get_participants_num(self, obj):
         return obj.participants.count()
+
+    def get_mean_rating(self, obj):
+        return obj.mean_rating()
+
+    def get_expected_rating(self, obj):
+        return obj.expected_rating
 
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
@@ -249,3 +269,13 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['id', 'text', 'unread', 'timestamp']
+
+
+class RatingWriteOnlySerializer(serializers.Serializer):
+    rating = serializers.IntegerField(min_value=0, max_value=5, allow_null=True)
+
+
+class RatingReadOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['id', 'user', 'project', 'rating']

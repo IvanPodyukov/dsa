@@ -103,9 +103,11 @@ ENV/
 .DS_Store
 *.sqlite3
 media/
+mediafiles/
 *.pyc
-*.db
 *.pid
+
+data.json
 
 # Ignore Django Migrations in Development if you are working on team
 

@@ -25,7 +25,7 @@
             </ul>
             {% with project.mean_rating as rating %}
                 <p>Средний рейтинг проекта: {% if rating is not None %}
-                    <img src="{% static 'images/star.png' %}" width="15" height="15"> {{ rating }} {% else %} Нет
+                    <img src="{% static 'images/star.png' %}" width="15" height="15"> {{ rating|floatformat:2 }} {% else %} Нет
                     рейтинга {% endif %}</p>
             {% endwith %}
             {% if project.creator == request.user %}
