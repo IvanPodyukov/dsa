@@ -10,7 +10,7 @@ from applications.models import Application
 from checkpoints.models import Checkpoint
 from notifications.models import Notification
 from participants.models import Participant
-from projects.models import Project
+from projects.models import Project, Rating
 
 
 class UserApiTestCase(TestCase):
@@ -239,6 +239,8 @@ class ProjectApiTestCase(TestCase):
                     'created': str(project.created),
                     'description': project.description,
                     'application_deadline': str(project.application_deadline),
+                    'mean_rating': None,
+                    'my_rating': None,
                     'completion_deadline': str(project.completion_deadline), 'status': project.status,
                     'tags': [{'id': self.interest1.id, 'title': self.interest1.title}], 'checkpoints_num': 0,
                     'participants_num': 0, 'vacancies_num': 0}
@@ -294,6 +296,42 @@ class ProjectApiTestCase(TestCase):
     def test_api_projects_mine_unauthorized(self):
         response = self.client.get('/api/projects/mine/', format='json')
         self.assertEqual(response.status_code, 401)
+
+    def test_api_rated_projects_authorized(self):
+        self.set_credentials(self.user1)
+        project = Project.objects.create(**self.project_info)
+        Rating.objects.create(user=self.user1, project=project, rating=4)
+        response = self.client.get('/api/projects/rated/', format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([x['id'] for x in response.json()], [project.id])
+        project.delete()
+        self.client.credentials()
+
+    def test_api_rated_projects_unauthorized(self):
+        response = self.client.get('/api/projects/rated/', format='json')
+        self.assertEqual(response.status_code, 401)
+
+    def test_api_rate_project_authorized(self):
+        self.set_credentials(self.user1)
+        project = Project.objects.create(**self.project_info)
+        Rating.objects.create(user=self.user1, project=project, rating=4)
+        response = self.client.post(f'/api/projects/{project.pk}/rate/', data={'rating': 3}, format='json')
+        self.assertEqual(response.status_code, 200)
+        rating = Rating.objects.get(user=self.user1, project=project)
+        expected = {'id': rating.pk, 'user': self.user1.pk, 'project': project.pk, 'rating': 3}
+        self.assertDictEqual(expected, response.json())
+        self.assertEqual(3, rating.rating)
+        response = self.client.post(f'/api/projects/{project.pk}/rate/', data={'rating': None}, format='json')
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Rating.objects.filter(user=self.user1, project=project).exists())
+        project.delete()
+        self.client.credentials()
+
+    def test_api_rate_project_unauthorized(self):
+        project = Project.objects.create(**self.project_info)
+        response = self.client.post(f'/api/projects/{project.pk}/rate/', format='json')
+        self.assertEqual(response.status_code, 401)
+        project.delete()
 
     def test_api_projects_involved_authorized(self):
         self.set_credentials(self.user2)

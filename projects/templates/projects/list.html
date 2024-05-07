@@ -13,6 +13,11 @@
             </form>
         </div>
         <div class="project-column">
+            <div class="button-container">
+                {% include 'common/pagination.html' %}
+                <a href="{% url 'projects:project_create' %}">Создать проект</a>
+            </div>
+            <br>
             <table class="info-table">
                 <tr>
                     <th>Название</th>
@@ -28,7 +33,7 @@
                 {% for project in projects %}
                     <tr>
                         <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
-                        <td>{{ project.description }}</td>
+                        <td>{{ project.description|truncatewords:10 }}</td>
                         <td>{{ project.get_status_display }}</td>
                         <td>{{ project.application_deadline|date:"d.m.Y" }}</td>
                         <td>{{ project.completion_deadline|date:"d.m.Y" }}</td>
@@ -39,10 +44,6 @@
                     </tr>
                 {% endfor %}
             </table>
-            <div class="button-container">
-                {% include 'common/pagination.html' %}
-                <a href="{% url 'projects:project_create' %}">Создать проект</a>
-            </div>
         </div>
     </div>
 {% endblock %}

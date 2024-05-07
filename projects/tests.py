@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from account.models import User, Interest
 from api.serializers import ProjectUpdateSerializer
-from projects.models import Project
+from projects.models import Project, Rating
 
 
 class ProjectTestCase(TestCase):
@@ -250,6 +250,54 @@ class ProjectTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account:login') + '?next=' + url)
+
+    def test_rated_projects_authorized(self):
+        self.client.login(email=self.user1.email)
+        url = reverse('projects:rated_projects')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+    def test_rated_projects_unauthorized(self):
+        url = reverse('projects:rated_projects')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
+
+    def test_leaderboard_projects_authorized(self):
+        self.client.login(email=self.user1.email)
+        url = reverse('projects:leaderboard')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+    def test_leaderboard_projects_unauthorized(self):
+        url = reverse('projects:leaderboard')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
+
+    def test_rate_project_authorized(self):
+        self.client.login(email=self.user1.email)
+        project = Project.objects.create(**self.project_info)
+        url = reverse('projects:rate_project', args=(project.pk,))
+        response = self.client.post(url, data={'rating': 4})
+        self.assertEqual(response.status_code, 302)
+        rating = Rating.objects.get(user=self.user1, project=project)
+        self.assertEqual(rating.rating, 4)
+        response = self.client.post(url, data={'rating': '-'})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Rating.objects.filter(user=self.user1, project=project).exists())
+        self.client.logout()
+        project.delete()
+
+    def test_rate_project_unauthorized(self):
+        project = Project.objects.create(**self.project_info)
+        url = reverse('projects:rate_project', args=(project.pk,))
+        response = self.client.post(url, data={'rating': 2})
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('account:login') + '?next=' + url)
+        project.delete()
 
     @classmethod
     def tearDownClass(cls):

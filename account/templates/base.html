@@ -36,18 +36,18 @@
         {% endif %}
     </div>
 </nav>
-<div>
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li class="msg">
-                    {{ message|safe }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-</div>
 <div class="main-content">
+    <div>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li class="msg">
+                        {{ message|safe }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
     {% block content %}
     {% endblock %}
 </div>

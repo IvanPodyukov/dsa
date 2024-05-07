@@ -3,7 +3,7 @@ import pickle
 
 import pandas as pd
 from django.db.models import Value, When, Case, FloatField
-from surprise import Reader, Dataset, SVD
+from surprise import Reader, Dataset, SVD, SVDpp, accuracy, NMF
 
 from projects.models import Rating, Project
 
@@ -75,4 +75,4 @@ def get_projects_queryset(pred):
         *conditions,
         default=Value(None),
         output_field=FloatField()
-    )).filter(expected_rating__gt=3.5).order_by('-expected_rating')
+    )).filter(expected_rating__gt=3.0).order_by('-expected_rating')

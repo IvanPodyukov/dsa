@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url_replace %}
 {% load project_tags %}
 {% load static %}
 {% load application_tags %}
@@ -25,7 +26,8 @@
             </ul>
             {% with project.mean_rating as rating %}
                 <p>Средний рейтинг проекта: {% if rating is not None %}
-                    <img src="{% static 'images/star.png' %}" width="15" height="15"> {{ rating|floatformat:2 }} {% else %} Нет
+                    <img src="{% static 'images/star.png' %}" width="15" height="15">
+                    {{ rating|floatformat:2 }} {% else %} Нет
                     рейтинга {% endif %}</p>
             {% endwith %}
             {% if project.creator == request.user %}
@@ -112,15 +114,12 @@
             {% endif %}
         </div>
     </div>
-    <div class="button-container">
-        <div class="rating">
-            <b>Насколько Вам интересен данный проект?</b>
-            <form method="post" action="{% url 'projects:rate_project' project.pk %}">
-                {% csrf_token %}
-                {{ rating_form.as_p }}
-                <button type="submit">Оценить</button>
-            </form>
-        </div>
-        <p><a href="{% url 'projects:projects_list' %}" class="back-button">Назад</a></p>
+    <div class="rating button-container">
+        <b>Насколько Вам интересен данный проект?</b>
+        <form method="post" action="{% url 'projects:rate_project' project.pk %}">
+            {% csrf_token %}
+            {{ rating_form.as_p }}
+            <button type="submit">Оценить</button>
+        </form>
     </div>
 {% endblock %}

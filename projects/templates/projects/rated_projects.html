@@ -3,6 +3,8 @@
 {% block title %}Оценённые проекты{% endblock %}
 {% block content %}
     <h1>Оценённые проекты</h1>
+    {% include 'common/pagination.html' %}
+    <br>
     <table class="info-table">
         <tr>
             <th>Название</th>
@@ -37,5 +39,4 @@
             </tr>
         {% endfor %}
     </table>
-    {% include 'common/pagination.html' %}
 {% endblock %}

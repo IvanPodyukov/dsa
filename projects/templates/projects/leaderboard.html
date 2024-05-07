@@ -3,6 +3,8 @@
 {% block title %}Топ проектов{% endblock %}
 {% block content %}
     <h1>Топ проектов</h1>
+    {% include 'common/pagination.html' %}
+    <br>
     <table class="info-table">
         <tr>
             <th>Место</th>
@@ -13,26 +15,30 @@
             <th>Теги</th>
             <th>Средний рейтинг</th>
         </tr>
-        {% for project in projects %}
-            <tr>
-                <td class="{% if forloop.counter == 1 %}first-place{% elif forloop.counter == 2 %}second-place{% elif forloop.counter == 3 %}third-place{% else %}other-place{% endif %}">{{ forloop.counter }}</td>
-                <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
-                <td>{{ project.description }}</td>
-                <td>{{ project.get_status_display }}</td>
-                <td><a href="{% url 'account:user-detail' project.creator.pk %}">{{ project.creator.full_name }}</a>
-                </td>
-                <td>
-                    <ul class="tag-list">
-                        {% for tag in project.tags.all %}
-                            <li>{{ tag }}</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-                <td>
-                    <img src="{% static 'images/star.png' %}" width="15" height="15"> {{ project.mean_rating }}
-                </td>
-            </tr>
-        {% endfor %}
+        {% with start=page_obj.start_index %}
+            {% for project in projects %}
+                <tr>
+                    {% with place=start|add:forloop.counter|add:"-1" %}
+                        <td class="{% if place == 1 %}first-place{% elif place == 2 %}second-place{% elif place == 3 %}third-place{% else %}other-place{% endif %}">{{ place }}</td>
+                    {% endwith %}
+                    <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
+                    <td>{{ project.description }}</td>
+                    <td>{{ project.get_status_display }}</td>
+                    <td><a href="{% url 'account:user-detail' project.creator.pk %}">{{ project.creator.full_name }}</a>
+                    </td>
+                    <td>
+                        <ul class="tag-list">
+                            {% for tag in project.tags.all %}
+                                <li>{{ tag }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <img src="{% static 'images/star.png' %}" width="15"
+                             height="15"> {{ project.mean_rating|floatformat:2 }}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endwith %}
     </table>
-    {% include 'common/pagination.html' %}
 {% endblock %}

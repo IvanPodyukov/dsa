@@ -1,8 +1,9 @@
+{% load url_replace %}
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; Первая</a>
-            <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+            <a href="?{% url_replace request 'page' 1 %}">&laquo; Первая</a>
+            <a href="?{% url_replace request 'page' page_obj.previous_page_number %}">Предыдущая</a>
         {% endif %}
 
         <span class="current">
@@ -10,8 +11,8 @@
         </span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">Следующая</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
+            <a href="?{% url_replace request 'page' page_obj.next_page_number %}">Следующая</a>
+            <a href="?{% url_replace request 'page' page_obj.paginator.num_pages %}">Последняя &raquo;</a>
         {% endif %}
     </span>
 </div>
