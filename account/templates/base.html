@@ -14,7 +14,7 @@
     <input type="checkbox" id="menu-toggle" name="menu" value="">
     <div id="mySidenav" class="sidenav">
         <label class="closebtn" for="menu-toggle">&times;</label>
-        <a href="{% url 'main' %}">DSA</a>
+        <a href="{% url 'main' %}">Главная страница</a>
         {% if request.user.is_authenticated %}
             <a href="{% url 'projects:projects_list' %}">Все проекты</a>
             <a href="{% url 'projects:recommended_projects_list' %}">Рекомендованные проекты</a>

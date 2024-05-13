@@ -7,7 +7,8 @@ from projects.models import Project
 
 class CheckpointListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
-        projects = Project.objects.filter(participants__in=self.request.user.participations.all())
+        projects = Project.objects.filter(participants__in=self.request.user.participations.all()).exclude(
+            status=Project.COMPLETED)
         checkpoints = Checkpoint.objects.filter(project__in=projects)
         return checkpoints.order_by('deadline')
 

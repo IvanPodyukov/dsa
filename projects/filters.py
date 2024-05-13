@@ -55,7 +55,6 @@ class ProjectRecommendedFilter(django_filters.FilterSet):
             ('checkpoints_num', 'Количество контрольных точек'),
             ('participants_num', 'Количество участников'),
             ('vacancies_num', 'Количество вакансий'),
-            ('common_tags', 'Число общих интересов'),
             ('expected_rating', 'Прогнозируемый рейтинг')
         ),
         label='Отсортировать по'

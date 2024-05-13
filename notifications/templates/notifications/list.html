@@ -17,6 +17,8 @@
                 <button type="submit">Удалить все уведомления</button>
             </form>
         </div>
+        {% include 'common/pagination.html' %}
+        <br>
         <table class="info-table">
             <tr>
                 <th>Текст</th>
@@ -66,7 +68,6 @@
                 {% endif %}
             {% endfor %}
         </table>
-        {% include 'common/pagination.html' %}
     {% else %}
         <h2>Нет уведомлений</h2>
     {% endif %}

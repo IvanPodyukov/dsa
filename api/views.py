@@ -149,9 +149,8 @@ class ProjectViewSet(ModelViewSet):
     def recommended(self, request):
         recommended_projects = self.filter_queryset(recommend_projects(request.user.pk)).exclude(
             status=Project.COMPLETED).annotate(
-            number_of_vacancies=Count('participants', filter=Q(participants__participant=None), distinct=True),
-            common_tags=Count('tags', distinct=True)
-        ).distinct().filter(number_of_vacancies__gt=0)
+            number_of_vacancies=Count('participants', filter=Q(participants__participant=None), distinct=True)
+        ).distinct().filter(number_of_vacancies__gt=0)[:10]
         page = self.paginate_queryset(recommended_projects)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -213,7 +212,8 @@ class CheckpointViewSet(UpdateModelMixin, RetrieveModelMixin, GenericViewSet):
 
     @action(detail=False, methods=['get'])
     def mine(self, request):
-        projects = Project.objects.filter(participants__in=request.user.participations.all())
+        projects = Project.objects.filter(participants__in=request.user.participations.all()).exclude(
+            status=Project.COMPLETED)
         checkpoints = Checkpoint.objects.filter(project__in=projects).order_by('deadline')
         page = self.paginate_queryset(checkpoints)
         if page is not None:

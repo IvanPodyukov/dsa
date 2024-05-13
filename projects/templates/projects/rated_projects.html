@@ -29,10 +29,10 @@
                          height="15"> {{ project.mean_rating|floatformat:2 }}</td>
                 <form method="post" action="{% url 'projects:rate_project' project.pk %}">
                     {% csrf_token %}
-                    <td class="rating">
+                    <td class="other-rating">
                         {{ form.as_p }}
                     </td>
-                    <td class="rating">
+                    <td class="other-rating">
                         <button type="submit">Оценить</button>
                     </td>
                 </form>

@@ -3,6 +3,8 @@
 {% block content %}
     {% if checkpoints %}
         <h1>Таблица контрольных точек</h1>
+        {% include 'common/pagination.html' %}
+        <br>
         <table class="info-table">
             <tr>
                 <th>Название</th>
@@ -21,7 +23,6 @@
                 </tr>
             {% endfor %}
         </table>
-        {% include 'common/pagination.html' %}
     {% else %}
         <h1>Контрольных точек нет</h1>
     {% endif %}

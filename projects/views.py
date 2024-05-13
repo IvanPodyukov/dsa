@@ -152,10 +152,9 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
     def get_queryset(self):
         projects = recommend_projects(self.request.user.pk).exclude(status=Project.COMPLETED).annotate(
             vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
-            common_tags=Count('tags', distinct=True),
             checkpoints_num=Count('checkpoints', distinct=True),
             participants_num=Count('participants', distinct=True),
-        ).distinct().filter(vacancies_num__gt=0)
+        ).distinct().filter(vacancies_num__gt=0)[:10]
         return projects
 
 

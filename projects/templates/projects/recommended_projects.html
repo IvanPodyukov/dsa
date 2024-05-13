@@ -4,59 +4,54 @@
 {% block title %}Рекомендованные проекты{% endblock %}
 {% block content %}
     <h1>Рекомендованные проекты</h1>
-    <div class="project-container">
-        <div class="filter-column">
-            <form method="get" class="filter-form">
-                {% for field in filter.form %}
-                    {{ field.label_tag }}
-                    {{ field }}
-                {% endfor %}
-                <button type="submit">Применить</button>
-            </form>
+    {% if request.user.interests.count == 0 or request.user.ratings.count == 0 %}
+        <div class="message-container">
+            <p>Функция рекомендаций недоступна. Пожалуйста, укажите научные интересы в <a
+                    href="{% url 'account:profile' %}">личном кабинете</a> и оцените
+                <a href="{% url 'projects:projects_list' %}">проекты</a> для того, чтобы использовать эту функцию</p>
         </div>
-        <div class="project-column">
-            {% include 'common/pagination.html' %}
-            <br>
-            <table class="info-table">
-                <tr>
-                    <th>Название</th>
-                    <th>Описание</th>
-                    <th>Статус</th>
-                    <th>Дедлайн подачи заявки</th>
-                    <th>Дедлайн завершения проекта</th>
-                    <th>Дата создания проекта</th>
-                    <th>Количество контрольных точек</th>
-                    <th>Количество участников</th>
-                    <th>Количество вакансий</th>
-                    <th>Число общих интересов</th>
-                    <th>Пересечение интересов с пользователем</th>
-                    <th>Прогнозируемый рейтинг</th>
-                </tr>
-                {% for project in projects %}
+    {% else %}
+        <div class="project-container">
+            <div class="filter-column">
+                <form method="get" class="filter-form">
+                    {% for field in filter.form %}
+                        {{ field.label_tag }}
+                        {{ field }}
+                    {% endfor %}
+                    <button type="submit">Применить</button>
+                </form>
+            </div>
+            <div class="project-column">
+                {% include 'common/pagination.html' %}
+                <br>
+                <table class="info-table">
                     <tr>
-                        <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
-                        <td>{{ project.description|truncatewords:10 }}</td>
-                        <td>{{ project.get_status_display }}</td>
-                        <td>{{ project.application_deadline|date:"d.m.Y" }}</td>
-                        <td>{{ project.completion_deadline|date:"d.m.Y" }}</td>
-                        <td>{{ project.created|date:"d.m.Y" }}</td>
-                        <td>{{ project.checkpoints_num }}</td>
-                        <td>{{ project.participants_num }}</td>
-                        <td>{{ project.vacancies_num }}</td>
-                        <td>{{ project.common_tags }}</td>
-                        {% commonInterests project request.user as interests %}
-                        <td>
-                            <ul class="tag-list">
-                                {% for interest in interests %}
-                                    <li>{{ interest.title }}</li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                        <td><img src="{% static 'images/star.png' %}" width="15"
-                                 height="15"> {{ project.expected_rating|floatformat:2 }}</td>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Дедлайн подачи заявки</th>
+                        <th>Дедлайн завершения проекта</th>
+                        <th>Дата создания проекта</th>
+                        <th>Количество контрольных точек</th>
+                        <th>Количество участников</th>
+                        <th>Количество вакансий</th>
+                        <th>Прогнозируемый рейтинг</th>
                     </tr>
-                {% endfor %}
-            </table>
+                    {% for project in projects %}
+                        <tr>
+                            <td><a href="{% url 'projects:project_info' project.pk %}">{{ project.title }}</a></td>
+                            <td>{{ project.description|truncatewords:10 }}</td>
+                            <td>{{ project.application_deadline|date:"d.m.Y" }}</td>
+                            <td>{{ project.completion_deadline|date:"d.m.Y" }}</td>
+                            <td>{{ project.created|date:"d.m.Y" }}</td>
+                            <td>{{ project.checkpoints_num }}</td>
+                            <td>{{ project.participants_num }}</td>
+                            <td>{{ project.vacancies_num }}</td>
+                            <td><img src="{% static 'images/star.png' %}" width="15"
+                                     height="15"> {{ project.expected_rating|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
