@@ -154,7 +154,7 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
             vacancies_num=Count('participants', filter=Q(participants__participant=None), distinct=True),
             checkpoints_num=Count('checkpoints', distinct=True),
             participants_num=Count('participants', distinct=True),
-        ).distinct().filter(vacancies_num__gt=0)[:10]
+        ).distinct().filter(vacancies_num__gt=0)
         return projects
 
 

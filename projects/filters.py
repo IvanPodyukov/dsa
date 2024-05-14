@@ -69,3 +69,7 @@ class ProjectRecommendedFilter(django_filters.FilterSet):
         self.filters['status'].label = 'Статус'
         choices = self.filters['ordering'].extra['choices']
         self.filters['ordering'].extra['choices'] = [(x, y.replace('descending', 'убывающий')) for x, y in choices]
+
+    def filter_queryset(self, queryset):
+        result = super().filter_queryset(queryset)
+        return result[:10]
