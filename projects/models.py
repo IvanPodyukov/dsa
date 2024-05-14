@@ -36,6 +36,12 @@ class Project(models.Model):
     def get_absolute_url(self):
         return reverse('projects:project_info', args=(self.id,))
 
+    def get_vacancies(self):
+        vacancies = self.participants.filter(participant=None)
+        if vacancies.count() == 0:
+            return '—'
+        return ', '.join(vacancy.title for vacancy in vacancies)
+
 
 class Rating(models.Model):
     project = models.ForeignKey(Project,

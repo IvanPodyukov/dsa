@@ -29,6 +29,7 @@
                     <th>Количество контрольных точек</th>
                     <th>Количество участников</th>
                     <th>Количество вакансий</th>
+                    <th>Вакансии</th>
                 </tr>
                 {% for project in projects %}
                     <tr>
@@ -41,6 +42,7 @@
                         <td>{{ project.checkpoints_num }}</td>
                         <td>{{ project.participants_num }}</td>
                         <td>{{ project.vacancies_num }}</td>
+                        <td>{{ project.get_vacancies }}</td>
                     </tr>
                 {% endfor %}
             </table>

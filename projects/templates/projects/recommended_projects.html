@@ -34,6 +34,7 @@
                         <th>Количество контрольных точек</th>
                         <th>Количество участников</th>
                         <th>Количество вакансий</th>
+                        <th>Вакансии</th>
                         <th>Прогнозируемый рейтинг</th>
                     </tr>
                     {% for project in projects %}
@@ -46,6 +47,7 @@
                             <td>{{ project.checkpoints_num }}</td>
                             <td>{{ project.participants_num }}</td>
                             <td>{{ project.vacancies_num }}</td>
+                            <td>{{ project.get_vacancies }}</td>
                             <td><img src="{% static 'images/star.png' %}" width="15"
                                      height="15"> {{ project.expected_rating|floatformat:2 }}</td>
                         </tr>
