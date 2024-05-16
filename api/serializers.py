@@ -123,7 +123,6 @@ class ProjectReadOnlySerializer(serializers.ModelSerializer):
 
 class ProjectRecommendedSerializer(serializers.ModelSerializer):
     tags = InterestSerializer(many=True, read_only=True)
-    common_tags = SerializerMethodField()
     vacancies_num = SerializerMethodField()
     checkpoints_num = SerializerMethodField()
     participants_num = SerializerMethodField()
@@ -133,11 +132,8 @@ class ProjectRecommendedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'title', 'created', 'description', 'application_deadline', 'completion_deadline',
-                  'status', 'tags', 'common_tags', 'checkpoints_num', 'participants_num', 'vacancies_num',
+                  'status', 'tags', 'checkpoints_num', 'participants_num', 'vacancies_num',
                   'mean_rating', 'expected_rating']
-
-    def get_common_tags(self, obj):
-        return obj.common_tags
 
     def get_vacancies_num(self, obj):
         return obj.number_of_vacancies
