@@ -41,7 +41,7 @@ class RatedProjectsView(LoginRequiredMixin, ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        projects = Project.objects.filter(ratings__user=self.request.user)
+        projects = Project.objects.filter(ratings__user=self.request.user).order_by('title')
         rating_forms = []
         for project in projects:
             form = RatingForm({'rating': project.ratings.get(user=self.request.user).rating})
