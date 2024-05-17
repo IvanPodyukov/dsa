@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Count, Q, Avg
+from django.http import QueryDict
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -148,6 +150,12 @@ class RecommendedProjectListView(LoginRequiredMixin, FilterView):
     template_name = 'projects/recommended_projects.html'
     filterset_class = ProjectRecommendedFilter
     paginate_by = 5
+
+    def get_filterset_kwargs(self, filterset_class):
+        filterset_kwargs = super().get_filterset_kwargs(filterset_class)
+        if filterset_kwargs['data'] is None:
+            filterset_kwargs['data'] = {'page': 1}
+        return filterset_kwargs
 
     def get_queryset(self):
         projects = recommend_projects(self.request.user.pk).exclude(status=Project.COMPLETED).annotate(
